@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FitTrack Trainer Dashboard — Manage coaching clients, submit qualifications, publish fitness packages, assign activities, schedule sessions, and track CRM.">
+  <meta name="author" content="FitTrack">
+  <meta name="theme-color" content="#10B981">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="FitTrack – Trainer Dashboard">
+  <meta property="og:description" content="Professional coaching portal to manage clients, assign workouts, review progress, and host video sessions.">
+  <meta property="og:type" content="website">
+
+  <title>FitTrack – Trainer Dashboard</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310B981' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='22 12 18 12 15 21 9 3 6 12 2 12'/></svg>">
+
+  <!-- Google Fonts: Inter + Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body data-dashboard-role="trainer">
+
+  <!-- Skip to Content -->
+  <a href="#dashboard-content" class="skip-link">Skip to main content</a>
+
+  <!-- App Shell -->
+  <div class="app" id="app">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Trainer navigation">
+      <!-- Rendered by sidebar.js -->
+    </aside>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
+
+    <!-- Main Content Area -->
+    <main class="main" id="main">
+
+      <!-- Top Navigation Bar -->
+      <header class="topbar" id="topbar" role="banner">
+        <!-- Rendered by app.js -->
+      </header>
+
+      <!-- Dashboard Content -->
+      <div class="content" id="dashboard-content" role="main">
+        <!-- Rendered by dashboard.js -->
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Container (Fixed) -->
+  <div class="toast-container" id="toast-container" aria-live="polite" aria-label="Notifications"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js?v=2.5.1"></script>
+  <script src="js/icons.js?v=2.5.1"></script>
+  <script src="js/components.js?v=2.5.1"></script>
+  <script src="js/sidebar.js?v=2.5.1"></script>
+  <script src="js/charts.js?v=2.5.1"></script>
+  <script src="js/dashboard.js?v=2.5.1"></script>
+  <script src="js/app.js?v=2.5.1"></script>
+
+</body>
+</html>

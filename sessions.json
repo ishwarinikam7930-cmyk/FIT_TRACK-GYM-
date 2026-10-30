@@ -1,0 +1,93 @@
+[
+  {
+    "id": "ts_001",
+    "clientName": "Aarav Sharma",
+    "clientInitials": "AS",
+    "date": "Thursday, Sep 24, 2026",
+    "time": "05:00 PM – 06:00 PM",
+    "type": "1-on-1 Video Coaching",
+    "duration": "60 min",
+    "topic": "Nutritional Calorie Adjustment & Deadlift Biomechanics",
+    "category": "today",
+    "status": "Confirmed",
+    "meetingLink": "https://meet.fittrack.com/session-rm-001"
+  },
+  {
+    "id": "ts_002",
+    "clientName": "Priya Patel",
+    "clientInitials": "PP",
+    "date": "Friday, Sep 25, 2026",
+    "time": "08:00 AM – 09:00 AM",
+    "type": "Running Gait & Biomechanics Audit",
+    "duration": "60 min",
+    "topic": "Cadence Analysis & Post-Run Foam Rolling Protocol",
+    "category": "upcoming",
+    "status": "Confirmed",
+    "meetingLink": "https://meet.fittrack.com/session-rm-002"
+  },
+  {
+    "id": "ts_003",
+    "clientName": "Rohan Verma",
+    "clientInitials": "RV",
+    "date": "Friday, Sep 25, 2026",
+    "time": "06:00 PM – 07:00 PM",
+    "type": "Hypertrophy Periodization",
+    "duration": "60 min",
+    "topic": "Chest & Shoulder Progressive Overload Plan",
+    "category": "upcoming",
+    "status": "Confirmed",
+    "meetingLink": "https://meet.fittrack.com/session-rm-003"
+  },
+  {
+    "id": "ts_004",
+    "clientName": "Ishwari Nikam",
+    "clientInitials": "IN",
+    "date": "Saturday, Sep 26, 2026",
+    "time": "06:00 PM – 07:00 PM",
+    "type": "1-on-1 Video Coaching",
+    "duration": "60 min",
+    "topic": "Squat Form Video Analysis & Month 2 Progression",
+    "category": "upcoming",
+    "status": "Confirmed",
+    "meetingLink": "https://meet.fittrack.com/session-rm-004"
+  },
+  {
+    "id": "ts_005",
+    "clientName": "Ananya Deshmukh",
+    "clientInitials": "AD",
+    "date": "Saturday, Sep 26, 2026",
+    "time": "10:00 AM – 11:00 AM",
+    "type": "Postural Assessment & Spine Mobility",
+    "duration": "60 min",
+    "topic": "Desk Worker Ergonomics & Cervical Spine Exercises",
+    "category": "upcoming",
+    "status": "Confirmed",
+    "meetingLink": "https://meet.fittrack.com/session-rm-005"
+  },
+  {
+    "id": "ts_past_1",
+    "clientName": "Vikram Seth",
+    "clientInitials": "VS",
+    "date": "Sep 18, 2026",
+    "time": "07:00 PM – 08:00 PM",
+    "type": "Diet & Caloric Deficit Review",
+    "duration": "60 min",
+    "topic": "Travel Diet Blueprint & Restaurant Guidance",
+    "category": "completed",
+    "status": "Completed",
+    "meetingLink": "https://meet.fittrack.com/session-rm-past1"
+  },
+  {
+    "id": "ts_canc_1",
+    "clientName": "Karan Mehra",
+    "clientInitials": "KM",
+    "date": "Sep 15, 2026",
+    "time": "04:00 PM – 05:00 PM",
+    "type": "1-on-1 Fitness Assessment",
+    "duration": "60 min",
+    "topic": "Client requested reschedule due to dental surgery",
+    "category": "cancelled",
+    "status": "Cancelled by Client",
+    "meetingLink": "#"
+  }
+]
