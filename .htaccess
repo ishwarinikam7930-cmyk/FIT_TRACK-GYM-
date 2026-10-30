@@ -1,0 +1,19 @@
+# FitTrack Gym - Apache Configuration & URL Rewriting for XAMPP
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /FIT_TRACK-GYM-/
+
+    # Allow direct file access for existing files and directories
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Map /api/sessions and subpaths to api/sessions.php
+    RewriteRule ^api/sessions(/.*)?$ api/sessions.php [QSA,L]
+</IfModule>
+
+# Prevent directory indexing
+Options -Indexes
+
+# Set UTF-8 encoding
+AddDefaultCharset UTF-8

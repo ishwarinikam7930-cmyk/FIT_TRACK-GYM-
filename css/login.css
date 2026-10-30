@@ -846,3 +846,193 @@
     font-size: 11px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   ALERT BANNERS (replaces old .login-error / .login-success)
+═══════════════════════════════════════════════════════ */
+.login-alert {
+  display: none;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  animation: slideDown 0.3s ease;
+  margin-bottom: var(--space-2);
+}
+
+.login-alert.visible { display: flex; }
+
+.login-alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+
+.login-alert--error {
+  background: var(--color-error-light);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--color-error);
+}
+
+.login-alert--success {
+  background: var(--color-success-light);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--color-emerald-700);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   OTP SECTION
+═══════════════════════════════════════════════════════ */
+.otp-section {
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.otp-email-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-emerald-50);
+  border: 1.5px solid var(--color-emerald-200);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-emerald-700);
+  word-break: break-all;
+}
+
+.otp-email-badge svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.otp-instruction {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: var(--leading-relaxed);
+  margin: 0;
+}
+
+/* ── 6-Digit OTP Input Grid ── */
+.otp-input-group {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+.otp-digit {
+  width: 48px;
+  height: 56px;
+  text-align: center;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+  caret-color: var(--color-primary);
+  outline: none;
+}
+
+.otp-digit:focus {
+  border-color: var(--color-primary);
+  background: var(--color-white);
+  box-shadow: var(--shadow-focus);
+  transform: scale(1.08);
+}
+
+.otp-digit:not(:placeholder-shown) {
+  border-color: var(--color-emerald-400);
+  background: var(--color-emerald-50);
+  color: var(--color-emerald-700);
+}
+
+@media (max-width: 400px) {
+  .otp-digit {
+    width: 40px;
+    height: 48px;
+    font-size: var(--text-xl);
+  }
+  .otp-input-group { gap: var(--space-1); }
+}
+
+/* ── Resend Row ── */
+.otp-resend-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.otp-resend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.otp-resend-btn:disabled {
+  color: var(--text-placeholder);
+  cursor: not-allowed;
+}
+
+.otp-resend-btn:not(:disabled):hover {
+  background: var(--color-emerald-50);
+  color: var(--color-primary-hover);
+}
+
+.otp-resend-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.otp-countdown {
+  font-size: var(--text-sm);
+  color: var(--text-placeholder);
+  min-width: 32px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PASSWORD STRENGTH METER
+═══════════════════════════════════════════════════════ */
+.password-strength {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: var(--space-1);
+}
+
+.strength-bars {
+  display: flex;
+  gap: 4px;
+}
+
+.strength-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border-light);
+  border-radius: var(--radius-full);
+  transition: background 0.3s ease;
+}
+
+.strength-label {
+  font-size: var(--text-xs);
+  color: var(--text-placeholder);
+  font-weight: var(--weight-medium);
+  transition: color 0.3s ease;
+}
+

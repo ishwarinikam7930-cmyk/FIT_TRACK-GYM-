@@ -26,33 +26,67 @@ const Auth = {
   },
 
   /** Clear session and redirect to login */
-  logout() {
+  async logout() {
     try {
+      fetch('api/auth/logout.php', { method: 'POST', credentials: 'include' }).catch(() => {});
       sessionStorage.removeItem('fittrack_user');
     } catch (e) { /* ignore */ }
     window.location.href = 'login.html';
   },
 
-  /** Ensure authenticated session, providing demo defaults if opened directly */
-  guard() {
+  /**
+   * Enforce authentication: verify server-side session via PHP.
+   * If unauthenticated, redirect to login.html immediately.
+   * This prevents direct URL access to the dashboard without login.
+   */
+  async guard() {
+    // Fast client-side check first
     if (!this.isLoggedIn()) {
-      const isTrainer = window.location.pathname.includes('trainer-dashboard');
-      const defaultUser = isTrainer ? {
-        name: 'Coach Arjun Mehta',
-        email: 'arjun.mehta@fittrack.com',
-        role: 'trainer',
-        loggedIn: true
-      } : {
-        name: 'Ishwari Nikam',
-        email: 'ishwari.nikam@email.com',
-        role: 'user',
-        loggedIn: true
-      };
-      try {
-        sessionStorage.setItem('fittrack_user', JSON.stringify(defaultUser));
-      } catch (e) { /* ignore */ }
+      this._redirectToLogin();
+      return false;
     }
-    return true;
+    // Server-side session validation
+    try {
+      const res = await fetch('api/auth/check-session.php', {
+        method: 'GET',
+        credentials: 'include'
+      });
+      if (!res.ok) {
+        sessionStorage.removeItem('fittrack_user');
+        this._redirectToLogin();
+        return false;
+      }
+      const data = await res.json();
+      if (!data.success) {
+        sessionStorage.removeItem('fittrack_user');
+        this._redirectToLogin();
+        return false;
+      }
+      // Sync session storage with server data
+      try {
+        const existing = JSON.parse(sessionStorage.getItem('fittrack_user') || '{}');
+        sessionStorage.setItem('fittrack_user', JSON.stringify({
+          ...existing,
+          id:       data.data?.user_id,
+          name:     data.data?.full_name,
+          email:    data.data?.email,
+          role:     data.data?.role,
+          loggedIn: true
+        }));
+      } catch (_) {}
+      return true;
+    } catch (err) {
+      // Network error — allow if sessionStorage says logged in (graceful degradation)
+      console.warn('Auth check network error:', err);
+      return this.isLoggedIn();
+    }
+  },
+
+  _redirectToLogin() {
+    // Determine path prefix based on current URL
+    const path = window.location.pathname;
+    const base = path.substring(0, path.lastIndexOf('/') + 1);
+    window.location.href = base + 'login.html';
   }
 };
 
@@ -60,10 +94,11 @@ const App = {
   toastTimeout: null,
 
   /* ── Initialize ── */
-  init() {
+  async init() {
     try {
-      // Auth guard: ensure authenticated demo session
-      Auth.guard();
+      // Auth guard: verify server-side session — redirects to login if not authenticated
+      const authed = await Auth.guard();
+      if (!authed) return; // Redirecting, stop initialization
     } catch (e) {
       console.warn('Auth guard error:', e);
     }

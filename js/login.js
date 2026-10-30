@@ -1,54 +1,50 @@
 /* ============================================
-   FitTrack – Login & Registration Page Logic (UC-02)
-   Handles authentication, direct self-service registration,
-   role-based redirection, input validation, and demo autofill.
+   FitTrack – Login, Registration & OTP Page Logic
+   Handles: Sign In, Sign Up with OTP verification,
+            Forgot Password, Reset Password.
    ============================================ */
 
 const LoginApp = (() => {
 
-  /* ── SVG Icons (self-contained for login page) ── */
-  const LoginIcons = {
-    logo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
-    mail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
-    lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
-    eye: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
-    eyeOff: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`,
-    arrowRight: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+  /* ── SVG Icons ── */
+  const Icons = {
+    logo:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+    mail:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`,
+    lock:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+    phone:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8 8.91a16 16 0 0 0 6.09 6.09l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+    user:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+    trainer:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M12 2v4"/><path d="M12 18v4"/><rect x="4" y="6" width="4" height="12" rx="1"/><rect x="16" y="6" width="4" height="12" rx="1"/></svg>`,
+    eye:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    eyeOff:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`,
+    arrowRight:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+    arrowLeft:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
     alertCircle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
     checkCircle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
-    chevronRight: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
-    user: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
-    trainer: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M12 2v4"/><path d="M12 18v4"/><rect x="4" y="6" width="4" height="12" rx="1"/><rect x="16" y="6" width="4" height="12" rx="1"/></svg>`,
-    shield: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
-    target: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
-    sparkles: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`
+    chevronRight:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+    shield:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    target:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+    sparkles:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
+    key:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>`,
+    refresh:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
   };
 
-  /* ── Demo Credentials Database ── */
+  /* ── Demo Credentials ── */
   const demoCredentials = {
-    user: {
-      email: 'ishwari.nikam@email.com',
-      password: 'User@123',
-      name: 'Ishwari Nikam',
-      role: 'user',
-      redirect: 'user-dashboard.html',
-    },
-    trainer: {
-      email: 'arjun.mehta@fittrack.com',
-      password: 'Trainer@123',
-      name: 'Coach Arjun Mehta',
-      role: 'trainer',
-      redirect: 'trainer-dashboard.html',
-    },
+    user:    { email: 'ishwari.nikam@email.com',  password: 'User@123',    name: 'Ishwari Nikam',    role: 'user',    redirect: 'user-dashboard.html' },
+    trainer: { email: 'arjun.mehta@fittrack.com', password: 'Trainer@123', name: 'Coach Arjun Mehta', role: 'trainer', redirect: 'trainer-dashboard.html' },
   };
 
   /* ── State ── */
-  let currentAuthMode = 'login'; // 'login' | 'register'
-  let currentRole = 'user'; // 'user' | 'trainer'
-  let passwordVisible = false;
-  let regPasswordVisible = false;
+  let currentMode = 'login';    // 'login' | 'register' | 'otp' | 'forgot' | 'reset'
+  let currentRole = 'user';
+  let pendingEmail = '';         // Email waiting for OTP verification
+  let otpCooldownTimer = null;
+  let otpCountdownEl   = null;
+  let passwordVisible  = { login: false, reg: false, reg2: false, reset: false, reset2: false };
 
-  /* ── Render Page ── */
+  /* ═══════════════════════════════════════════════════
+     RENDER
+  ═══════════════════════════════════════════════════ */
   function render() {
     document.body.innerHTML = `
       <div class="login-page" id="login-page">
@@ -65,250 +61,309 @@ const LoginApp = (() => {
 
           <!-- Brand Header -->
           <div class="login-brand">
-            <div class="login-logo" id="login-logo">
-              ${LoginIcons.logo}
-            </div>
+            <div class="login-logo" id="login-logo">${Icons.logo}</div>
             <h1 class="login-brand-name">Fit<span>Track</span></h1>
             <p class="login-brand-tagline">Your personal fitness journey starts here</p>
           </div>
 
           <!-- Card -->
-          <div class="login-card">
+          <div class="login-card" id="login-card">
             <div class="login-card-inner">
 
-              <!-- Auth Mode Switcher (Sign In vs Register) -->
-              <div class="login-mode-tabs" id="login-mode-tabs" role="tablist" aria-label="Sign In or Register">
-                <button class="login-mode-tab active" data-mode="login" role="tab" aria-selected="true" id="tab-mode-login">
-                  <span>Sign In</span>
-                </button>
-                <button class="login-mode-tab" data-mode="register" role="tab" aria-selected="false" id="tab-mode-register">
-                  <span>Create Account</span>
-                </button>
+              <!-- Auth Mode Tabs (only shown on login/register) -->
+              <div class="login-mode-tabs" id="login-mode-tabs" role="tablist">
+                <button class="login-mode-tab active" data-mode="login" role="tab" id="tab-mode-login">Sign In</button>
+                <button class="login-mode-tab" data-mode="register" role="tab" id="tab-mode-register">Create Account</button>
               </div>
 
               <!-- Role Tabs -->
-              <div class="login-role-tabs" id="login-role-tabs" role="tablist" aria-label="Account role selection">
-                <button class="login-role-tab active" data-role="user" role="tab" aria-selected="true" id="tab-user">
-                  <span class="tab-icon">${LoginIcons.user}</span>
+              <div class="login-role-tabs" id="login-role-tabs" role="tablist">
+                <button class="login-role-tab active" data-role="user" role="tab" id="tab-user">
+                  <span class="tab-icon">${Icons.user}</span>
                   <span class="tab-label">Member</span>
                 </button>
-                <button class="login-role-tab" data-role="trainer" role="tab" aria-selected="false" id="tab-trainer">
-                  <span class="tab-icon">${LoginIcons.trainer}</span>
+                <button class="login-role-tab" data-role="trainer" role="tab" id="tab-trainer">
+                  <span class="tab-icon">${Icons.trainer}</span>
                   <span class="tab-label">Coach / Trainer</span>
                 </button>
               </div>
 
-              <!-- Card Header -->
+              <!-- Card Title -->
               <h2 class="login-card-title" id="login-card-title">Welcome back</h2>
               <p class="login-card-subtitle" id="login-card-subtitle">Sign in to your member account to continue</p>
 
-              <!-- Error / Success Messages -->
-              <div class="login-error" id="login-error" role="alert">
-                ${LoginIcons.alertCircle}
+              <!-- Alert Banners -->
+              <div class="login-alert login-alert--error" id="login-error" role="alert">
+                ${Icons.alertCircle}
                 <span id="login-error-text"></span>
               </div>
-              <div class="login-success" id="login-success" role="status">
-                ${LoginIcons.checkCircle}
+              <div class="login-alert login-alert--success" id="login-success" role="status">
+                ${Icons.checkCircle}
                 <span id="login-success-text"></span>
               </div>
 
-              <!-- 1. SIGN IN FORM -->
-              <form class="login-form" id="login-form" novalidate autocomplete="on" style="display: flex;">
-
-                <!-- Email Field -->
+              <!-- ── 1. SIGN IN FORM ── -->
+              <form class="login-form" id="login-form" novalidate autocomplete="on">
                 <div class="login-field" id="field-email">
                   <label for="login-email">Email Address <span class="required">*</span></label>
                   <div class="login-input-wrapper">
-                    <span class="login-input-icon">${LoginIcons.mail}</span>
-                    <input
-                      type="email"
-                      id="login-email"
-                      class="login-input"
-                      placeholder="Enter your email"
-                      required
-                      autocomplete="email"
-                      aria-describedby="email-error"
-                    />
+                    <span class="login-input-icon">${Icons.mail}</span>
+                    <input type="email" id="login-email" class="login-input" placeholder="Enter your email" required autocomplete="email"/>
                   </div>
                   <span class="field-error" id="email-error">Please enter a valid email address</span>
                 </div>
 
-                <!-- Password Field -->
                 <div class="login-field" id="field-password">
                   <label for="login-password">Password <span class="required">*</span></label>
                   <div class="login-input-wrapper">
-                    <span class="login-input-icon">${LoginIcons.lock}</span>
-                    <input
-                      type="password"
-                      id="login-password"
-                      class="login-input"
-                      placeholder="Enter your password"
-                      required
-                      autocomplete="current-password"
-                      aria-describedby="password-error"
-                    />
-                    <button type="button" class="login-password-toggle" id="login-password-toggle" aria-label="Toggle password visibility">
-                      ${LoginIcons.eye}
-                    </button>
+                    <span class="login-input-icon">${Icons.lock}</span>
+                    <input type="password" id="login-password" class="login-input" placeholder="Enter your password" required autocomplete="current-password"/>
+                    <button type="button" class="login-password-toggle" id="login-password-toggle" aria-label="Toggle password visibility">${Icons.eye}</button>
                   </div>
                   <span class="field-error" id="password-error">Password is required</span>
                 </div>
 
-                <!-- Remember Me & Forgot Password -->
                 <div class="login-extras">
                   <label class="login-remember">
-                    <input type="checkbox" id="login-remember" />
+                    <input type="checkbox" id="login-remember"/>
                     <span>Remember me</span>
                   </label>
                   <a href="#" class="login-forgot" id="login-forgot">Forgot password?</a>
                 </div>
 
-                <!-- Submit Button -->
                 <button type="submit" class="login-submit-btn" id="login-submit-btn">
                   <span class="btn-text">Sign In</span>
-                  ${LoginIcons.arrowRight}
+                  ${Icons.arrowRight}
                   <span class="login-spinner"></span>
                 </button>
 
-                <!-- Switch Link -->
                 <div class="login-switch-prompt">
                   Don't have an account?
                   <button type="button" class="login-switch-link" id="link-to-register">Register now</button>
                 </div>
-
               </form>
 
-              <!-- 2. REGISTRATION FORM -->
-              <form class="login-form" id="register-form" novalidate autocomplete="on" style="display: none;">
+              <!-- ── 2. REGISTRATION FORM ── -->
+              <form class="login-form" id="register-form" novalidate autocomplete="on" style="display:none;">
 
-                <!-- Full Name Field -->
                 <div class="login-field" id="field-reg-name">
                   <label for="reg-name">Full Name <span class="required">*</span></label>
                   <div class="login-input-wrapper">
-                    <span class="login-input-icon">${LoginIcons.user}</span>
-                    <input
-                      type="text"
-                      id="reg-name"
-                      class="login-input"
-                      placeholder="e.g. Ishwari Nikam"
-                      required
-                      autocomplete="name"
-                      aria-describedby="reg-name-error"
-                    />
+                    <span class="login-input-icon">${Icons.user}</span>
+                    <input type="text" id="reg-name" class="login-input" placeholder="e.g. Ishwari Nikam" required autocomplete="name"/>
                   </div>
-                  <span class="field-error" id="reg-name-error">Full name is required</span>
+                  <span class="field-error" id="reg-name-error">Full name is required (letters, spaces, hyphens only)</span>
                 </div>
 
-                <!-- Email Field -->
                 <div class="login-field" id="field-reg-email">
                   <label for="reg-email">Email Address <span class="required">*</span></label>
                   <div class="login-input-wrapper">
-                    <span class="login-input-icon">${LoginIcons.mail}</span>
-                    <input
-                      type="email"
-                      id="reg-email"
-                      class="login-input"
-                      placeholder="e.g. ishwari@example.com"
-                      required
-                      autocomplete="email"
-                      aria-describedby="reg-email-error"
-                    />
+                    <span class="login-input-icon">${Icons.mail}</span>
+                    <input type="email" id="reg-email" class="login-input" placeholder="e.g. ishwari@example.com" required autocomplete="email"/>
                   </div>
                   <span class="field-error" id="reg-email-error">Please enter a valid email address</span>
                 </div>
 
-                <!-- Password & Confirm Password Grid -->
-                <div class="login-form-grid">
-                  <div class="login-field" id="field-reg-password">
-                    <label for="reg-password">Password <span class="required">*</span></label>
-                    <div class="login-input-wrapper">
-                      <span class="login-input-icon">${LoginIcons.lock}</span>
-                      <input
-                        type="password"
-                        id="reg-password"
-                        class="login-input"
-                        placeholder="At least 6 chars"
-                        required
-                        autocomplete="new-password"
-                        aria-describedby="reg-password-error"
-                      />
-                      <button type="button" class="login-password-toggle" id="reg-password-toggle" aria-label="Toggle password visibility">
-                        ${LoginIcons.eye}
-                      </button>
-                    </div>
-                    <span class="field-error" id="reg-password-error">Min 6 characters</span>
+                <div class="login-field" id="field-reg-phone">
+                  <label for="reg-phone">Mobile Number <span class="required">*</span></label>
+                  <div class="login-input-wrapper">
+                    <span class="login-input-icon">${Icons.phone}</span>
+                    <input type="tel" id="reg-phone" class="login-input" placeholder="+91 98765 43210" required autocomplete="tel"/>
                   </div>
-
-                  <div class="login-field" id="field-reg-confirm-password">
-                    <label for="reg-confirm-password">Confirm Password <span class="required">*</span></label>
-                    <div class="login-input-wrapper">
-                      <span class="login-input-icon">${LoginIcons.lock}</span>
-                      <input
-                        type="password"
-                        id="reg-confirm-password"
-                        class="login-input"
-                        placeholder="Re-enter password"
-                        required
-                        autocomplete="new-password"
-                        aria-describedby="reg-confirm-error"
-                      />
-                    </div>
-                    <span class="field-error" id="reg-confirm-error">Passwords must match</span>
-                  </div>
+                  <span class="field-error" id="reg-phone-error">Enter a valid mobile number (7–15 digits)</span>
                 </div>
 
-                <!-- Role Specific Customized Field -->
+                <!-- Password Strength Meter -->
+                <div class="login-field" id="field-reg-password">
+                  <label for="reg-password">Password <span class="required">*</span></label>
+                  <div class="login-input-wrapper">
+                    <span class="login-input-icon">${Icons.lock}</span>
+                    <input type="password" id="reg-password" class="login-input" placeholder="Min 8 chars, A-Z, a-z, 0-9" required autocomplete="new-password"/>
+                    <button type="button" class="login-password-toggle" id="reg-password-toggle" aria-label="Toggle password visibility">${Icons.eye}</button>
+                  </div>
+                  <div class="password-strength" id="password-strength">
+                    <div class="strength-bars">
+                      <div class="strength-bar" id="bar-1"></div>
+                      <div class="strength-bar" id="bar-2"></div>
+                      <div class="strength-bar" id="bar-3"></div>
+                      <div class="strength-bar" id="bar-4"></div>
+                    </div>
+                    <span class="strength-label" id="strength-label">Enter a password</span>
+                  </div>
+                  <span class="field-error" id="reg-password-error">Min 8 chars with uppercase, lowercase, and number</span>
+                </div>
+
+                <div class="login-field" id="field-reg-confirm-password">
+                  <label for="reg-confirm-password">Confirm Password <span class="required">*</span></label>
+                  <div class="login-input-wrapper">
+                    <span class="login-input-icon">${Icons.lock}</span>
+                    <input type="password" id="reg-confirm-password" class="login-input" placeholder="Re-enter your password" required autocomplete="new-password"/>
+                    <button type="button" class="login-password-toggle" id="reg-confirm-toggle" aria-label="Toggle confirm password visibility">${Icons.eye}</button>
+                  </div>
+                  <span class="field-error" id="reg-confirm-error">Passwords must match</span>
+                </div>
+
                 <div class="login-field" id="field-reg-role-extra">
                   <label for="reg-role-extra" id="label-reg-role-extra">Primary Fitness Goal <span class="required">*</span></label>
                   <div class="login-input-wrapper">
-                    <span class="login-input-icon" id="icon-reg-role-extra">${LoginIcons.target}</span>
+                    <span class="login-input-icon" id="icon-reg-role-extra">${Icons.target}</span>
                     <select id="reg-role-extra" class="login-select" required>
-                      <option value="Fat Loss & Muscle Toning">Fat Loss & Muscle Toning</option>
-                      <option value="Strength & Muscle Hypertrophy">Strength & Muscle Hypertrophy</option>
-                      <option value="Posture, Mobility & Core Reset">Posture, Mobility & Core Reset</option>
-                      <option value="Athletic Conditioning & Endurance">Athletic Conditioning & Endurance</option>
-                      <option value="General Health & Longevity">General Health & Longevity</option>
+                      <option value="Fat Loss &amp; Muscle Toning">Fat Loss &amp; Muscle Toning</option>
+                      <option value="Strength &amp; Muscle Hypertrophy">Strength &amp; Muscle Hypertrophy</option>
+                      <option value="Posture, Mobility &amp; Core Reset">Posture, Mobility &amp; Core Reset</option>
+                      <option value="Athletic Conditioning &amp; Endurance">Athletic Conditioning &amp; Endurance</option>
+                      <option value="General Health &amp; Longevity">General Health &amp; Longevity</option>
                     </select>
                   </div>
                 </div>
 
-                <!-- Terms Checkbox -->
                 <div class="login-extras">
                   <label class="login-remember" id="field-reg-terms">
-                    <input type="checkbox" id="reg-terms" checked />
-                    <span>I agree to FitTrack's <a href="#" onclick="event.preventDefault(); App?.showToast ? App.showToast('info', 'Terms', 'Demo terms accepted.') : alert('Terms of Service accepted.');" style="color:var(--color-primary);text-decoration:underline;">Terms & Privacy</a></span>
+                    <input type="checkbox" id="reg-terms" checked/>
+                    <span>I agree to FitTrack's <a href="#" onclick="return false;" style="color:var(--color-primary);text-decoration:underline;">Terms &amp; Privacy</a></span>
                   </label>
                 </div>
 
-                <!-- Submit Button -->
                 <button type="submit" class="login-submit-btn" id="reg-submit-btn">
                   <span class="btn-text" id="reg-btn-text">Create Member Account</span>
-                  ${LoginIcons.sparkles}
+                  ${Icons.sparkles}
                   <span class="login-spinner"></span>
                 </button>
 
-                <!-- Switch Link -->
                 <div class="login-switch-prompt">
                   Already have an account?
                   <button type="button" class="login-switch-link" id="link-to-login">Sign in here</button>
                 </div>
-
               </form>
 
-              <!-- Quick Demo Login Section (Visible on Sign In) -->
-              <div class="login-demo-section" id="login-demo-section">
-                <div class="login-divider">
-                  <span>Quick Demo Login</span>
+              <!-- ── 3. OTP VERIFICATION FORM ── -->
+              <div class="login-form otp-section" id="otp-section" style="display:none;">
+                <div class="otp-email-badge" id="otp-email-badge">
+                  ${Icons.mail}
+                  <span id="otp-email-display">your@email.com</span>
                 </div>
 
-                <div class="login-demo-cards" id="login-demo-cards">
+                <p class="otp-instruction">Enter the 6-digit code sent to your email address. The code expires in <strong>5 minutes</strong>.</p>
+
+                <div class="otp-input-group" id="otp-input-group">
+                  <input type="text" class="otp-digit" id="otp-0" maxlength="1" pattern="\d" inputmode="numeric" autocomplete="one-time-code" aria-label="OTP digit 1"/>
+                  <input type="text" class="otp-digit" id="otp-1" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 2"/>
+                  <input type="text" class="otp-digit" id="otp-2" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 3"/>
+                  <input type="text" class="otp-digit" id="otp-3" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 4"/>
+                  <input type="text" class="otp-digit" id="otp-4" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 5"/>
+                  <input type="text" class="otp-digit" id="otp-5" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 6"/>
+                </div>
+
+                <button type="button" class="login-submit-btn" id="otp-verify-btn">
+                  <span class="btn-text">Verify Email</span>
+                  ${Icons.checkCircle}
+                  <span class="login-spinner"></span>
+                </button>
+
+                <div class="otp-resend-row">
+                  <button type="button" class="otp-resend-btn" id="otp-resend-btn" disabled>
+                    ${Icons.refresh} Resend OTP
+                  </button>
+                  <span class="otp-countdown" id="otp-countdown"></span>
+                </div>
+
+                <div class="login-switch-prompt">
+                  <button type="button" class="login-switch-link" id="otp-back-btn">${Icons.arrowLeft} Back to Register</button>
+                </div>
+              </div>
+
+              <!-- ── 4. FORGOT PASSWORD FORM ── -->
+              <form class="login-form" id="forgot-form" novalidate style="display:none;">
+                <p class="otp-instruction">Enter your registered email address. We'll send you a reset OTP.</p>
+
+                <div class="login-field" id="field-forgot-email">
+                  <label for="forgot-email">Email Address <span class="required">*</span></label>
+                  <div class="login-input-wrapper">
+                    <span class="login-input-icon">${Icons.mail}</span>
+                    <input type="email" id="forgot-email" class="login-input" placeholder="Enter your registered email" required autocomplete="email"/>
+                  </div>
+                  <span class="field-error" id="forgot-email-error">Please enter a valid email address</span>
+                </div>
+
+                <button type="submit" class="login-submit-btn" id="forgot-submit-btn">
+                  <span class="btn-text">Send Reset OTP</span>
+                  ${Icons.key}
+                  <span class="login-spinner"></span>
+                </button>
+
+                <div class="login-switch-prompt">
+                  <button type="button" class="login-switch-link" id="forgot-back-btn">${Icons.arrowLeft} Back to Sign In</button>
+                </div>
+              </form>
+
+              <!-- ── 5. RESET PASSWORD FORM ── -->
+              <form class="login-form" id="reset-form" novalidate style="display:none;">
+                <div class="otp-email-badge" id="reset-email-badge">
+                  ${Icons.mail}
+                  <span id="reset-email-display">your@email.com</span>
+                </div>
+
+                <div class="login-field">
+                  <label>Reset OTP <span class="required">*</span></label>
+                  <div class="otp-input-group" id="reset-otp-group">
+                    <input type="text" class="otp-digit" id="reset-otp-0" maxlength="1" pattern="\d" inputmode="numeric" autocomplete="one-time-code" aria-label="OTP digit 1"/>
+                    <input type="text" class="otp-digit" id="reset-otp-1" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 2"/>
+                    <input type="text" class="otp-digit" id="reset-otp-2" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 3"/>
+                    <input type="text" class="otp-digit" id="reset-otp-3" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 4"/>
+                    <input type="text" class="otp-digit" id="reset-otp-4" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 5"/>
+                    <input type="text" class="otp-digit" id="reset-otp-5" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 6"/>
+                  </div>
+                </div>
+
+                <div class="login-field" id="field-reset-password">
+                  <label for="reset-password">New Password <span class="required">*</span></label>
+                  <div class="login-input-wrapper">
+                    <span class="login-input-icon">${Icons.lock}</span>
+                    <input type="password" id="reset-password" class="login-input" placeholder="Min 8 chars, A-Z, a-z, 0-9" required autocomplete="new-password"/>
+                    <button type="button" class="login-password-toggle" id="reset-password-toggle" aria-label="Toggle password visibility">${Icons.eye}</button>
+                  </div>
+                  <span class="field-error" id="reset-password-error">Min 8 chars with uppercase, lowercase, and number</span>
+                </div>
+
+                <div class="login-field" id="field-reset-confirm-password">
+                  <label for="reset-confirm-password">Confirm New Password <span class="required">*</span></label>
+                  <div class="login-input-wrapper">
+                    <span class="login-input-icon">${Icons.lock}</span>
+                    <input type="password" id="reset-confirm-password" class="login-input" placeholder="Re-enter new password" required autocomplete="new-password"/>
+                    <button type="button" class="login-password-toggle" id="reset-confirm-toggle" aria-label="Toggle confirm password visibility">${Icons.eye}</button>
+                  </div>
+                  <span class="field-error" id="reset-confirm-error">Passwords must match</span>
+                </div>
+
+                <button type="submit" class="login-submit-btn" id="reset-submit-btn">
+                  <span class="btn-text">Reset Password</span>
+                  ${Icons.checkCircle}
+                  <span class="login-spinner"></span>
+                </button>
+
+                <div class="otp-resend-row">
+                  <button type="button" class="otp-resend-btn" id="reset-resend-btn" disabled>
+                    ${Icons.refresh} Resend OTP
+                  </button>
+                  <span class="otp-countdown" id="reset-countdown"></span>
+                </div>
+
+                <div class="login-switch-prompt">
+                  <button type="button" class="login-switch-link" id="reset-back-btn">${Icons.arrowLeft} Back to Sign In</button>
+                </div>
+              </form>
+
+              <!-- Demo Section (only on login) -->
+              <div class="login-demo-section" id="login-demo-section">
+                <div class="login-divider"><span>Quick Demo Login</span></div>
+                <div class="login-demo-cards">
                   <div class="login-demo-card" data-role="user" id="demo-user" tabindex="0" role="button" aria-label="Login as demo user Ishwari Nikam">
                     <div class="login-demo-card-avatar role-user">IN</div>
                     <div class="login-demo-card-info">
                       <div class="login-demo-card-role">Member — Ishwari Nikam</div>
                       <div class="login-demo-card-email">ishwari.nikam@email.com</div>
                     </div>
-                    <div class="login-demo-card-arrow">${LoginIcons.chevronRight}</div>
+                    <div class="login-demo-card-arrow">${Icons.chevronRight}</div>
                   </div>
                   <div class="login-demo-card" data-role="trainer" id="demo-trainer" tabindex="0" role="button" aria-label="Login as demo trainer Coach Arjun">
                     <div class="login-demo-card-avatar role-trainer">AM</div>
@@ -316,7 +371,7 @@ const LoginApp = (() => {
                       <div class="login-demo-card-role">Trainer — Coach Arjun Mehta</div>
                       <div class="login-demo-card-email">arjun.mehta@fittrack.com</div>
                     </div>
-                    <div class="login-demo-card-arrow">${LoginIcons.chevronRight}</div>
+                    <div class="login-demo-card-arrow">${Icons.chevronRight}</div>
                   </div>
                 </div>
               </div>
@@ -324,7 +379,6 @@ const LoginApp = (() => {
             </div>
           </div>
 
-          <!-- Footer -->
           <div class="login-footer">
             <p>&copy; 2026 FitTrack. All rights reserved.</p>
           </div>
@@ -334,458 +388,732 @@ const LoginApp = (() => {
     `;
 
     bindEvents();
+    injectShakeAnimation();
   }
 
-  /* ── Bind Events ── */
+  /* ═══════════════════════════════════════════════════
+     EVENT BINDING
+  ═══════════════════════════════════════════════════ */
   function bindEvents() {
-    // Mode tabs (Sign In vs Register)
-    const modeTabs = document.querySelectorAll('.login-mode-tab');
-    modeTabs.forEach(tab => {
-      tab.addEventListener('click', () => switchAuthMode(tab.dataset.mode));
-    });
+    // Mode tabs
+    document.querySelectorAll('.login-mode-tab').forEach(t => t.addEventListener('click', () => switchMode(t.dataset.mode)));
 
-    // Role tabs (Member vs Coach)
-    const roleTabs = document.querySelectorAll('.login-role-tab');
-    roleTabs.forEach(tab => {
-      tab.addEventListener('click', () => switchRole(tab.dataset.role));
-    });
+    // Role tabs
+    document.querySelectorAll('.login-role-tab').forEach(t => t.addEventListener('click', () => switchRole(t.dataset.role)));
 
     // Switch links
-    const linkToRegister = document.getElementById('link-to-register');
-    if (linkToRegister) linkToRegister.addEventListener('click', () => switchAuthMode('register'));
+    on('link-to-register', 'click', () => switchMode('register'));
+    on('link-to-login',    'click', () => switchMode('login'));
+    on('otp-back-btn',     'click', () => switchMode('register'));
+    on('forgot-back-btn',  'click', () => switchMode('login'));
+    on('reset-back-btn',   'click', () => switchMode('login'));
 
-    const linkToLogin = document.getElementById('link-to-login');
-    if (linkToLogin) linkToLogin.addEventListener('click', () => switchAuthMode('login'));
-
-    // Form submissions
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) loginForm.addEventListener('submit', handleLoginSubmit);
-
-    const regForm = document.getElementById('register-form');
-    if (regForm) regForm.addEventListener('submit', handleRegisterSubmit);
+    // Forms
+    on('login-form',    'submit', handleLoginSubmit);
+    on('register-form', 'submit', handleRegisterSubmit);
+    on('forgot-form',   'submit', handleForgotSubmit);
+    on('reset-form',    'submit', handleResetSubmit);
 
     // Password toggles
-    const toggle = document.getElementById('login-password-toggle');
-    if (toggle) toggle.addEventListener('click', () => togglePassword('login'));
+    on('login-password-toggle',   'click', () => togglePwd('login',  'login-password'));
+    on('reg-password-toggle',     'click', () => togglePwd('reg',    'reg-password'));
+    on('reg-confirm-toggle',      'click', () => togglePwd('reg2',   'reg-confirm-password'));
+    on('reset-password-toggle',   'click', () => togglePwd('reset',  'reset-password'));
+    on('reset-confirm-toggle',    'click', () => togglePwd('reset2', 'reset-confirm-password'));
 
-    const regToggle = document.getElementById('reg-password-toggle');
-    if (regToggle) regToggle.addEventListener('click', () => togglePassword('register'));
+    // Forgot password link
+    on('login-forgot', 'click', (e) => { e.preventDefault(); switchMode('forgot'); });
 
     // Demo cards
-    const demoCards = document.querySelectorAll('.login-demo-card');
-    demoCards.forEach(card => {
-      card.addEventListener('click', () => fillDemoCredentials(card.dataset.role));
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          fillDemoCredentials(card.dataset.role);
-        }
-      });
+    document.querySelectorAll('.login-demo-card').forEach(c => {
+      c.addEventListener('click', () => fillDemo(c.dataset.role));
+      c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fillDemo(c.dataset.role); } });
     });
 
     // Clear field errors on input
-    const emailInput = document.getElementById('login-email');
-    const passwordInput = document.getElementById('login-password');
-    if (emailInput) emailInput.addEventListener('input', () => clearFieldError('email'));
-    if (passwordInput) passwordInput.addEventListener('input', () => clearFieldError('password'));
-
-    const regName = document.getElementById('reg-name');
-    const regEmail = document.getElementById('reg-email');
-    const regPassword = document.getElementById('reg-password');
-    const regConfirm = document.getElementById('reg-confirm-password');
-
-    if (regName) regName.addEventListener('input', () => clearFieldError('reg-name'));
-    if (regEmail) regEmail.addEventListener('input', () => clearFieldError('reg-email'));
-    if (regPassword) regPassword.addEventListener('input', () => clearFieldError('reg-password'));
-    if (regConfirm) regConfirm.addEventListener('input', () => clearFieldError('reg-confirm-password'));
-
-    // Forgot password
-    const forgotLink = document.getElementById('login-forgot');
-    if (forgotLink) {
-      forgotLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        showMessage('error', 'Use demo credentials or register a new instant self-service account.');
-      });
-    }
-  }
-
-  /* ── Switch Auth Mode (Sign In vs Register) ── */
-  function switchAuthMode(mode) {
-    currentAuthMode = mode;
-
-    // Update Mode Tabs
-    document.querySelectorAll('.login-mode-tab').forEach(tab => {
-      const isActive = tab.dataset.mode === mode;
-      tab.classList.toggle('active', isActive);
-      tab.setAttribute('aria-selected', isActive);
+    ['login-email',    'login-password',
+     'reg-name',       'reg-email',       'reg-phone', 'reg-password', 'reg-confirm-password',
+     'forgot-email',   'reset-password',  'reset-confirm-password'
+    ].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', () => clearFieldError(id.replace('login-', '').replace('reg-', 'reg-').replace('forgot-', 'forgot-').replace('reset-', 'reset-')));
     });
 
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const demoSection = document.getElementById('login-demo-section');
+    // Password strength meter
+    const regPwd = document.getElementById('reg-password');
+    if (regPwd) regPwd.addEventListener('input', () => updateStrengthMeter(regPwd.value));
 
-    if (mode === 'register') {
-      loginForm.style.display = 'none';
-      registerForm.style.display = 'flex';
-      demoSection.style.display = 'none';
-    } else {
-      loginForm.style.display = 'flex';
-      registerForm.style.display = 'none';
-      demoSection.style.display = 'block';
-    }
+    // OTP inputs
+    setupOtpInputs('otp');
+    setupOtpInputs('reset-otp');
 
-    updateTitles();
-    hideMessages();
-    clearAllFieldErrors();
+    // Verify OTP button
+    on('otp-verify-btn',  'click', handleVerifyOtp);
+    on('otp-resend-btn',  'click', () => resendOtp('verify'));
+    on('reset-resend-btn','click', () => resendOtp('reset'));
   }
 
-  /* ── Switch Role Tab ── */
+  /* ═══════════════════════════════════════════════════
+     MODE & ROLE SWITCHING
+  ═══════════════════════════════════════════════════ */
+  function switchMode(mode) {
+    currentMode = mode;
+
+    const isAuthMode  = (mode === 'login' || mode === 'register');
+    const isOtpMode   = (mode === 'otp');
+    const isForgot    = (mode === 'forgot');
+    const isReset     = (mode === 'reset');
+
+    // Tab visibility
+    setDisplay('login-mode-tabs',  isAuthMode ? 'flex' : 'none');
+    setDisplay('login-role-tabs',  isAuthMode ? 'flex' : 'none');
+    setDisplay('login-demo-section', mode === 'login' ? 'block' : 'none');
+
+    // Form visibility
+    setDisplay('login-form',    mode === 'login'    ? 'flex' : 'none');
+    setDisplay('register-form', mode === 'register' ? 'flex' : 'none');
+    setDisplay('otp-section',   isOtpMode           ? 'flex' : 'none');
+    setDisplay('forgot-form',   isForgot            ? 'flex' : 'none');
+    setDisplay('reset-form',    isReset             ? 'flex' : 'none');
+
+    // Tab states
+    document.querySelectorAll('.login-mode-tab').forEach(t => {
+      const active = t.dataset.mode === mode;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', active);
+    });
+
+    updateTitles();
+    hideAlerts();
+    clearAllErrors();
+  }
+
   function switchRole(role) {
     currentRole = role;
 
-    // Update Role Tabs
-    document.querySelectorAll('.login-role-tab').forEach(tab => {
-      const isActive = tab.dataset.role === role;
-      tab.classList.toggle('active', isActive);
-      tab.setAttribute('aria-selected', isActive);
+    document.querySelectorAll('.login-role-tab').forEach(t => {
+      const active = t.dataset.role === role;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', active);
     });
 
-    // Update role extra options in registration form
-    const labelExtra = document.getElementById('label-reg-role-extra');
-    const iconExtra = document.getElementById('icon-reg-role-extra');
-    const selectExtra = document.getElementById('reg-role-extra');
-    const regBtnText = document.getElementById('reg-btn-text');
-
-    if (role === 'trainer') {
-      if (labelExtra) labelExtra.innerHTML = `Primary Coaching Specialization <span class="required">*</span>`;
-      if (iconExtra) iconExtra.innerHTML = LoginIcons.shield;
-      if (selectExtra) {
-        selectExtra.innerHTML = `
-          <option value="Strength & Conditioning">Strength & Conditioning</option>
-          <option value="HIIT & Athletic Fat Loss">HIIT & Athletic Fat Loss</option>
-          <option value="Yoga, Posture & Mobility">Yoga, Posture & Mobility</option>
-          <option value="Sports Nutrition & Body Recomposition">Sports Nutrition & Body Recomposition</option>
-          <option value="Functional Rehabilitation">Functional Rehabilitation</option>
-        `;
-      }
-      if (regBtnText) regBtnText.textContent = 'Register as Certified Coach';
-    } else {
-      if (labelExtra) labelExtra.innerHTML = `Primary Fitness Goal <span class="required">*</span>`;
-      if (iconExtra) iconExtra.innerHTML = LoginIcons.target;
-      if (selectExtra) {
-        selectExtra.innerHTML = `
-          <option value="Fat Loss & Muscle Toning">Fat Loss & Muscle Toning</option>
-          <option value="Strength & Muscle Hypertrophy">Strength & Muscle Hypertrophy</option>
-          <option value="Posture, Mobility & Core Reset">Posture, Mobility & Core Reset</option>
-          <option value="Athletic Conditioning & Endurance">Athletic Conditioning & Endurance</option>
-          <option value="General Health & Longevity">General Health & Longevity</option>
-        `;
-      }
-      if (regBtnText) regBtnText.textContent = 'Create Member Account';
-    }
-
+    updateRoleExtraField(role);
     updateTitles();
-    hideMessages();
-    clearAllFieldErrors();
+    hideAlerts();
   }
 
-  /* ── Update Header Titles ── */
   function updateTitles() {
     const titles = {
-      login: {
-        user: { title: 'Welcome back', subtitle: 'Sign in to your member account to continue' },
-        trainer: { title: 'Coach Portal', subtitle: 'Access your professional coaching dashboard' },
-      },
-      register: {
-        user: { title: 'Join FitTrack', subtitle: 'Create your self-service member account in seconds' },
-        trainer: { title: 'Coach Registration', subtitle: 'Create your professional trainer profile and start coaching' }
-      }
+      login:    { user: ['Welcome back', 'Sign in to your member account'],          trainer: ['Coach Portal', 'Access your professional coaching dashboard'] },
+      register: { user: ['Join FitTrack', 'Create your member account in seconds'],  trainer: ['Coach Registration', 'Create your professional trainer profile'] },
+      otp:      { user: ['Check Your Email', 'Enter the 6-digit verification code'], trainer: ['Check Your Email', 'Enter the 6-digit verification code'] },
+      forgot:   { user: ['Forgot Password?', 'We\'ll send you a reset OTP'],          trainer: ['Forgot Password?', 'We\'ll send you a reset OTP'] },
+      reset:    { user: ['Reset Password', 'Enter the OTP and choose a new password'], trainer: ['Reset Password', 'Enter the OTP and choose a new password'] },
     };
 
-    const cardTitle = document.getElementById('login-card-title');
-    const cardSubtitle = document.getElementById('login-card-subtitle');
+    const t = titles[currentMode]?.[currentRole] || ['FitTrack', ''];
+    const titleEl    = document.getElementById('login-card-title');
+    const subtitleEl = document.getElementById('login-card-subtitle');
 
-    if (cardTitle && cardSubtitle) {
-      cardTitle.style.opacity = '0';
-      cardSubtitle.style.opacity = '0';
-      cardTitle.style.transform = 'translateY(-4px)';
-
+    if (titleEl && subtitleEl) {
+      titleEl.style.opacity    = '0';
+      subtitleEl.style.opacity = '0';
       setTimeout(() => {
-        const config = titles[currentAuthMode][currentRole];
-        cardTitle.textContent = config.title;
-        cardSubtitle.textContent = config.subtitle;
-        cardTitle.style.opacity = '1';
-        cardSubtitle.style.opacity = '1';
-        cardTitle.style.transform = 'translateY(0)';
+        titleEl.textContent    = t[0];
+        subtitleEl.textContent = t[1];
+        titleEl.style.opacity    = '1';
+        subtitleEl.style.opacity = '1';
       }, 120);
-
-      cardTitle.style.transition = 'all 0.2s ease';
-      cardSubtitle.style.transition = 'all 0.2s ease';
+      titleEl.style.transition    = 'opacity 0.2s ease';
+      subtitleEl.style.transition = 'opacity 0.2s ease';
     }
   }
 
-  /* ── Toggle Password Visibility ── */
-  function togglePassword(formType) {
-    if (formType === 'register') {
-      regPasswordVisible = !regPasswordVisible;
-      const input = document.getElementById('reg-password');
-      const toggle = document.getElementById('reg-password-toggle');
-      if (input) input.type = regPasswordVisible ? 'text' : 'password';
-      if (toggle) toggle.innerHTML = regPasswordVisible ? LoginIcons.eyeOff : LoginIcons.eye;
+  function updateRoleExtraField(role) {
+    const label  = document.getElementById('label-reg-role-extra');
+    const icon   = document.getElementById('icon-reg-role-extra');
+    const select = document.getElementById('reg-role-extra');
+    const btn    = document.getElementById('reg-btn-text');
+
+    if (role === 'trainer') {
+      if (label)  label.innerHTML  = `Primary Coaching Specialization <span class="required">*</span>`;
+      if (icon)   icon.innerHTML   = Icons.shield;
+      if (select) select.innerHTML = `
+        <option value="Strength &amp; Conditioning">Strength &amp; Conditioning</option>
+        <option value="HIIT &amp; Athletic Fat Loss">HIIT &amp; Athletic Fat Loss</option>
+        <option value="Yoga, Posture &amp; Mobility">Yoga, Posture &amp; Mobility</option>
+        <option value="Sports Nutrition &amp; Body Recomposition">Sports Nutrition &amp; Body Recomposition</option>
+        <option value="Functional Rehabilitation">Functional Rehabilitation</option>
+      `;
+      if (btn)    btn.textContent  = 'Register as Certified Coach';
     } else {
-      passwordVisible = !passwordVisible;
-      const input = document.getElementById('login-password');
-      const toggle = document.getElementById('login-password-toggle');
-      if (input) input.type = passwordVisible ? 'text' : 'password';
-      if (toggle) toggle.innerHTML = passwordVisible ? LoginIcons.eyeOff : LoginIcons.eye;
+      if (label)  label.innerHTML  = `Primary Fitness Goal <span class="required">*</span>`;
+      if (icon)   icon.innerHTML   = Icons.target;
+      if (select) select.innerHTML = `
+        <option value="Fat Loss &amp; Muscle Toning">Fat Loss &amp; Muscle Toning</option>
+        <option value="Strength &amp; Muscle Hypertrophy">Strength &amp; Muscle Hypertrophy</option>
+        <option value="Posture, Mobility &amp; Core Reset">Posture, Mobility &amp; Core Reset</option>
+        <option value="Athletic Conditioning &amp; Endurance">Athletic Conditioning &amp; Endurance</option>
+        <option value="General Health &amp; Longevity">General Health &amp; Longevity</option>
+      `;
+      if (btn)    btn.textContent  = 'Create Member Account';
     }
   }
 
-  /* ── Fill Demo Credentials ── */
-  function fillDemoCredentials(role) {
+  /* ═══════════════════════════════════════════════════
+     OTP INPUT SETUP
+  ═══════════════════════════════════════════════════ */
+  function setupOtpInputs(prefix) {
+    for (let i = 0; i < 6; i++) {
+      const input = document.getElementById(`${prefix}-${i}`);
+      if (!input) continue;
+
+      input.addEventListener('input', (e) => {
+        const val = e.target.value.replace(/\D/g, '');
+        e.target.value = val ? val[val.length - 1] : '';
+        if (val && i < 5) document.getElementById(`${prefix}-${i + 1}`)?.focus();
+        autoVerifyIfComplete(prefix);
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && i > 0) {
+          document.getElementById(`${prefix}-${i - 1}`)?.focus();
+        }
+        if (e.key === 'ArrowLeft'  && i > 0) document.getElementById(`${prefix}-${i - 1}`)?.focus();
+        if (e.key === 'ArrowRight' && i < 5) document.getElementById(`${prefix}-${i + 1}`)?.focus();
+      });
+
+      input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+        [...pasted.slice(0, 6)].forEach((ch, idx) => {
+          const el = document.getElementById(`${prefix}-${idx}`);
+          if (el) el.value = ch;
+        });
+        const last = Math.min(pasted.length - 1, 5);
+        document.getElementById(`${prefix}-${last}`)?.focus();
+        autoVerifyIfComplete(prefix);
+      });
+    }
+  }
+
+  function getOtpValue(prefix) {
+    return Array.from({ length: 6 }, (_, i) => document.getElementById(`${prefix}-${i}`)?.value || '').join('');
+  }
+
+  function clearOtpInputs(prefix) {
+    for (let i = 0; i < 6; i++) {
+      const el = document.getElementById(`${prefix}-${i}`);
+      if (el) el.value = '';
+    }
+    document.getElementById(`${prefix}-0`)?.focus();
+  }
+
+  function autoVerifyIfComplete(prefix) {
+    if (prefix === 'otp' && getOtpValue('otp').length === 6) {
+      setTimeout(handleVerifyOtp, 300);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     FORM HANDLERS
+  ═══════════════════════════════════════════════════ */
+  async function handleLoginSubmit(e) {
+    e.preventDefault();
+    const email    = val('login-email').toLowerCase();
+    const password = val('login-password');
+
+    let valid = true;
+    if (!email || !isEmail(email)) { showFieldError('email', !email ? 'Email is required' : 'Enter a valid email'); valid = false; }
+    if (!password)                 { showFieldError('password', 'Password is required'); valid = false; }
+
+    if (!valid) { showAlert('error', 'Please fix the highlighted fields.'); return; }
+
+    hideAlerts();
+    await handleLogin(email, password);
+  }
+
+  async function handleRegisterSubmit(e) {
+    e.preventDefault();
+    const name     = val('reg-name');
+    const email    = val('reg-email').toLowerCase();
+    const phone    = val('reg-phone');
+    const password = val('reg-password');
+    const confirm  = val('reg-confirm-password');
+    const terms    = document.getElementById('reg-terms')?.checked;
+    const roleExtra = document.getElementById('reg-role-extra')?.value;
+
+    let valid = true;
+
+    if (!name || name.length < 2)             { showFieldError('reg-name',             'Full name must be at least 2 characters'); valid = false; }
+    if (!email || !isEmail(email))            { showFieldError('reg-email',            'Enter a valid email address'); valid = false; }
+    if (!validatePhone(phone))                { showFieldError('reg-phone',            'Enter a valid mobile number (7–15 digits)'); valid = false; }
+    if (!validatePassword(password))          { showFieldError('reg-password',         'Min 8 chars with uppercase, lowercase, and number'); valid = false; }
+    if (password !== confirm)                 { showFieldError('reg-confirm-password', 'Passwords do not match'); valid = false; }
+    if (!terms)                               { showAlert('error', 'Please accept the Terms & Conditions.'); return; }
+
+    if (!valid) { showAlert('error', 'Please fix the highlighted fields.'); return; }
+
+    const btn = document.getElementById('reg-submit-btn');
+    btn.classList.add('loading');
+    hideAlerts();
+
+    try {
+      const res = await apiFetch('api/auth/register.php', {
+        full_name:        name,
+        email:            email,
+        phone:            phone,
+        password:         password,
+        confirm_password: confirm,
+        role:             currentRole,
+        role_extra:       roleExtra
+      });
+
+      btn.classList.remove('loading');
+
+      if (res.success) {
+        pendingEmail = email;
+        showAlert('success', `Account created! We've sent a verification code to ${email}`);
+        setTimeout(() => {
+          showOtpScreen(email, 'verify', res.data?.cooldown || 60);
+        }, 800);
+      } else {
+        // If email already exists and unverified, go directly to OTP
+        if (res.data?.action === 'resend_otp') {
+          pendingEmail = email;
+          showAlert('success', 'Unverified account found. A new OTP has been sent.');
+          setTimeout(() => showOtpScreen(email, 'verify', 60), 800);
+        } else {
+          showAlert('error', res.message || 'Registration failed.');
+        }
+      }
+    } catch (err) {
+      btn.classList.remove('loading');
+      showAlert('error', 'Cannot connect to server. Please ensure XAMPP is running.');
+    }
+  }
+
+  async function handleVerifyOtp() {
+    const otp = getOtpValue('otp');
+    if (otp.length < 6) {
+      shakeCard();
+      showAlert('error', 'Please enter all 6 digits of the OTP.');
+      return;
+    }
+
+    const btn = document.getElementById('otp-verify-btn');
+    btn.classList.add('loading');
+    hideAlerts();
+
+    try {
+      const res = await apiFetch('api/auth/verify-otp.php', { email: pendingEmail, otp });
+      btn.classList.remove('loading');
+
+      if (res.success) {
+        clearOtpTimer();
+        showAlert('success', '✅ Email verified! Redirecting to your dashboard...');
+        // Store session info in sessionStorage for dashboard JS
+        try {
+          sessionStorage.setItem('fittrack_user', JSON.stringify({
+            id:       res.data?.user?.user_id,
+            name:     res.data?.user?.full_name,
+            email:    res.data?.user?.email,
+            role:     res.data?.user?.role,
+            loggedIn: true,
+          }));
+        } catch (_) {}
+        setTimeout(() => { window.location.href = res.data?.redirect || 'user-dashboard.html'; }, 1200);
+      } else {
+        clearOtpInputs('otp');
+        shakeCard();
+        showAlert('error', res.message || 'Incorrect OTP. Please try again.');
+      }
+    } catch (err) {
+      btn.classList.remove('loading');
+      showAlert('error', 'Network error. Please check XAMPP is running.');
+    }
+  }
+
+  async function handleForgotSubmit(e) {
+    e.preventDefault();
+    const email = val('forgot-email').toLowerCase();
+
+    if (!email || !isEmail(email)) {
+      showFieldError('forgot-email', 'Enter a valid email address');
+      return;
+    }
+
+    const btn = document.getElementById('forgot-submit-btn');
+    btn.classList.add('loading');
+    hideAlerts();
+
+    try {
+      const res = await apiFetch('api/auth/forgot-password.php', { email });
+      btn.classList.remove('loading');
+
+      // Always show success (server protects against enumeration)
+      showAlert('success', res.message || 'If an account exists, a reset OTP has been sent.');
+      pendingEmail = email;
+      setTimeout(() => showResetScreen(email, res.data?.cooldown || 60), 1200);
+    } catch (err) {
+      btn.classList.remove('loading');
+      showAlert('error', 'Network error. Please ensure XAMPP is running.');
+    }
+  }
+
+  async function handleResetSubmit(e) {
+    e.preventDefault();
+    const otp     = getOtpValue('reset-otp');
+    const newPwd  = val('reset-password');
+    const confirm = val('reset-confirm-password');
+
+    let valid = true;
+    if (otp.length < 6)              { showAlert('error', 'Please enter all 6 OTP digits.'); valid = false; }
+    if (!validatePassword(newPwd))   { showFieldError('reset-password',         'Min 8 chars with uppercase, lowercase, and number'); valid = false; }
+    if (newPwd !== confirm)          { showFieldError('reset-confirm-password', 'Passwords do not match'); valid = false; }
+
+    if (!valid) return;
+
+    const btn = document.getElementById('reset-submit-btn');
+    btn.classList.add('loading');
+    hideAlerts();
+
+    try {
+      const res = await apiFetch('api/auth/reset-password.php', {
+        email:            pendingEmail,
+        otp,
+        new_password:     newPwd,
+        confirm_password: confirm
+      });
+      btn.classList.remove('loading');
+
+      if (res.success) {
+        clearOtpTimer();
+        showAlert('success', '🎉 Password reset successfully! Please sign in with your new password.');
+        setTimeout(() => switchMode('login'), 2000);
+      } else {
+        clearOtpInputs('reset-otp');
+        shakeCard();
+        showAlert('error', res.message || 'Invalid or expired OTP.');
+      }
+    } catch (err) {
+      btn.classList.remove('loading');
+      showAlert('error', 'Network error. Please ensure XAMPP is running.');
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     LOGIN LOGIC
+  ═══════════════════════════════════════════════════ */
+  async function handleLogin(email, password) {
+    const btn = document.getElementById('login-submit-btn');
+    if (btn) btn.classList.add('loading');
+
+    try {
+      const res = await apiFetch('api/auth/login.php', { email, password, role: currentRole });
+      if (btn) btn.classList.remove('loading');
+
+      if (res.success) {
+        const user = res.data?.user || {};
+        showAlert('success', `Welcome back, ${user.full_name || 'User'}! Redirecting...`);
+
+        try {
+          sessionStorage.setItem('fittrack_user', JSON.stringify({
+            id:       user.user_id,
+            name:     user.full_name,
+            email:    user.email,
+            role:     user.role,
+            loggedIn: true,
+            loginTime: new Date().toISOString()
+          }));
+        } catch (_) {}
+
+        setTimeout(() => { window.location.href = res.data?.redirect || 'user-dashboard.html'; }, 1000);
+      } else {
+        if (btn) btn.classList.remove('loading');
+        shakeCard();
+
+        // If unverified email, offer to go to OTP
+        if (res.data?.action === 'resend_otp') {
+          showAlert('error', res.message + ' Click here to verify.');
+          pendingEmail = email;
+          setTimeout(() => showOtpScreen(email, 'verify', 60), 1500);
+        } else {
+          showAlert('error', res.message || 'Invalid email or password.');
+        }
+      }
+    } catch (err) {
+      if (btn) btn.classList.remove('loading');
+      // Demo offline fallback
+      const cred = Object.values(demoCredentials).find(c => c.email === email && c.password === password);
+      if (cred) {
+        try { sessionStorage.setItem('fittrack_user', JSON.stringify({ ...cred, loggedIn: true })); } catch (_) {}
+        showAlert('success', `Welcome, ${cred.name}! (Offline mode)`);
+        setTimeout(() => { window.location.href = cred.redirect; }, 1000);
+      } else {
+        showAlert('error', 'Cannot connect to server. Please ensure XAMPP Apache & MySQL are running.');
+      }
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     OTP SCREEN HELPERS
+  ═══════════════════════════════════════════════════ */
+  function showOtpScreen(email, type, cooldown) {
+    const emailBadge = document.getElementById('otp-email-display');
+    if (emailBadge) emailBadge.textContent = email;
+    switchMode('otp');
+    clearOtpInputs('otp');
+    startOtpCountdown(cooldown, 'otp-countdown', 'otp-resend-btn');
+    setTimeout(() => document.getElementById('otp-0')?.focus(), 200);
+  }
+
+  function showResetScreen(email, cooldown) {
+    const emailBadge = document.getElementById('reset-email-display');
+    if (emailBadge) emailBadge.textContent = email;
+    switchMode('reset');
+    clearOtpInputs('reset-otp');
+    startOtpCountdown(cooldown, 'reset-countdown', 'reset-resend-btn');
+    setTimeout(() => document.getElementById('reset-otp-0')?.focus(), 200);
+  }
+
+  async function resendOtp(type) {
+    const endpoint = type === 'reset' ? 'api/auth/forgot-password.php' : 'api/auth/send-otp.php';
+    const resendBtn  = document.getElementById(type === 'reset' ? 'reset-resend-btn' : 'otp-resend-btn');
+    const countdown  = document.getElementById(type === 'reset' ? 'reset-countdown' : 'otp-countdown');
+
+    hideAlerts();
+    if (resendBtn) resendBtn.disabled = true;
+
+    try {
+      const res = await apiFetch(endpoint, { email: pendingEmail });
+      if (res.success || res.message) {
+        showAlert('success', 'OTP resent! Check your email.');
+        startOtpCountdown(res.data?.cooldown || 60, countdown?.id, resendBtn?.id);
+      } else {
+        showAlert('error', res.message || 'Failed to resend OTP.');
+        if (resendBtn) resendBtn.disabled = false;
+      }
+    } catch (_) {
+      showAlert('error', 'Network error. Please try again.');
+      if (resendBtn) resendBtn.disabled = false;
+    }
+  }
+
+  function startOtpCountdown(seconds, countdownId, btnId) {
+    clearOtpTimer();
+    let remaining = seconds;
+
+    const update = () => {
+      const el  = typeof countdownId === 'string' ? document.getElementById(countdownId) : countdownId;
+      const btn = typeof btnId === 'string'        ? document.getElementById(btnId)       : btnId;
+      if (el)  el.textContent  = remaining > 0 ? `(${remaining}s)` : '';
+      if (btn) btn.disabled    = remaining > 0;
+    };
+
+    update();
+    otpCooldownTimer = setInterval(() => {
+      remaining--;
+      update();
+      if (remaining <= 0) clearOtpTimer();
+    }, 1000);
+  }
+
+  function clearOtpTimer() {
+    if (otpCooldownTimer) { clearInterval(otpCooldownTimer); otpCooldownTimer = null; }
+  }
+
+  /* ═══════════════════════════════════════════════════
+     DEMO AUTOFILL
+  ═══════════════════════════════════════════════════ */
+  function fillDemo(role) {
     const cred = demoCredentials[role];
     if (!cred) return;
-
-    if (currentAuthMode !== 'login') {
-      switchAuthMode('login');
-    }
-
+    switchMode('login');
     switchRole(role);
 
     const emailInput = document.getElementById('login-email');
-    const passwordInput = document.getElementById('login-password');
-
+    const pwdInput   = document.getElementById('login-password');
     emailInput.value = '';
-    passwordInput.value = '';
+    pwdInput.value   = '';
 
     typeInto(emailInput, cred.email, 0, () => {
-      typeInto(passwordInput, cred.password, 0, () => {
-        showMessage('success', `Demo credentials loaded for ${cred.name}. Logging in...`);
-        setTimeout(() => {
-          handleLogin(cred.email, cred.password);
-        }, 800);
+      typeInto(pwdInput, cred.password, 0, () => {
+        showAlert('success', `Demo credentials for ${cred.name} loaded. Signing in...`);
+        setTimeout(() => handleLogin(cred.email, cred.password), 600);
       });
     });
   }
 
-  /* ── Typing Animation ── */
-  function typeInto(input, text, index, callback) {
-    if (index < text.length) {
-      input.value += text[index];
+  function typeInto(input, text, i, cb) {
+    if (i < text.length) {
+      input.value += text[i];
       input.dispatchEvent(new Event('input'));
-      setTimeout(() => typeInto(input, text, index + 1, callback), 20);
-    } else {
-      if (callback) callback();
-    }
+      setTimeout(() => typeInto(input, text, i + 1, cb), 20);
+    } else if (cb) cb();
   }
 
-  /* ── Sign In Submission ── */
-  function handleLoginSubmit(e) {
-    e.preventDefault();
+  /* ═══════════════════════════════════════════════════
+     PASSWORD STRENGTH METER
+  ═══════════════════════════════════════════════════ */
+  function updateStrengthMeter(pwd) {
+    let score = 0;
+    if (pwd.length >= 8)  score++;
+    if (/[a-z]/.test(pwd)) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/\d/.test(pwd))    score++;
+    if (/[^a-zA-Z0-9]/.test(pwd)) score++;
 
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
+    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+    const colors = ['', '#ef4444', '#f59e0b', '#10b981', '#059669', '#047857'];
 
-    let valid = true;
-
-    if (!email || !isValidEmail(email)) {
-      showFieldError('email', !email ? 'Email address is required' : 'Please enter a valid email address');
-      valid = false;
+    const labelEl = document.getElementById('strength-label');
+    if (labelEl) {
+      labelEl.textContent = pwd.length === 0 ? 'Enter a password' : (labels[score] || 'Weak');
+      labelEl.style.color = colors[score] || '#adb5bd';
     }
 
-    if (!password) {
-      showFieldError('password', 'Password is required');
-      valid = false;
-    } else if (password.length < 6) {
-      showFieldError('password', 'Password must be at least 6 characters');
-      valid = false;
-    }
-
-    if (!valid) {
-      showMessage('error', 'Please correct the highlighted fields.');
-      return;
-    }
-
-    hideMessages();
-    handleLogin(email, password);
-  }
-
-  /* ── Registration Submission ── */
-  function handleRegisterSubmit(e) {
-    e.preventDefault();
-
-    const name = document.getElementById('reg-name').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const password = document.getElementById('reg-password').value;
-    const confirmPassword = document.getElementById('reg-confirm-password').value;
-    const roleExtra = document.getElementById('reg-role-extra').value;
-    const terms = document.getElementById('reg-terms').checked;
-
-    let valid = true;
-
-    if (!name) {
-      showFieldError('reg-name', 'Full name is required');
-      valid = false;
-    }
-
-    if (!email || !isValidEmail(email)) {
-      showFieldError('reg-email', !email ? 'Email address is required' : 'Please enter a valid email address');
-      valid = false;
-    }
-
-    if (!password || password.length < 6) {
-      showFieldError('reg-password', 'Password must be at least 6 characters');
-      valid = false;
-    }
-
-    if (password !== confirmPassword) {
-      showFieldError('reg-confirm-password', 'Passwords do not match');
-      valid = false;
-    }
-
-    if (!terms) {
-      showMessage('error', 'Please accept the Terms & Conditions to register.');
-      return;
-    }
-
-    if (!valid) {
-      showMessage('error', 'Please correct the highlighted fields and try again.');
-      return;
-    }
-
-    const btn = document.getElementById('reg-submit-btn');
-    btn.classList.add('loading');
-
-    // Instant registration and activation
-    setTimeout(() => {
-      btn.classList.remove('loading');
-
-      const isTrainer = currentRole === 'trainer';
-      const redirectPage = isTrainer ? 'trainer-dashboard.html' : 'user-dashboard.html';
-
-      // Save user session
-      try {
-        sessionStorage.setItem('fittrack_user', JSON.stringify({
-          name: name,
-          email: email,
-          role: currentRole,
-          roleExtra: roleExtra,
-          loggedIn: true,
-          registeredAt: new Date().toISOString()
-        }));
-      } catch (err) {
-        // continue
+    for (let i = 1; i <= 4; i++) {
+      const bar = document.getElementById(`bar-${i}`);
+      if (bar) {
+        bar.style.background = i <= score ? (colors[Math.min(score, 4)] || '#e9ecef') : '#e9ecef';
       }
-
-      showMessage('success', `🎉 Account created! Welcome, ${name}! Launching your ${isTrainer ? 'Coach' : 'Member'} portal...`);
-
-      setTimeout(() => {
-        window.location.href = redirectPage;
-      }, 1200);
-
-    }, 1000);
+    }
   }
 
-  /* ── Login Logic ── */
-  function handleLogin(email, password) {
-    const btn = document.getElementById('login-submit-btn');
-    btn.classList.add('loading');
+  /* ═══════════════════════════════════════════════════
+     UTILITIES
+  ═══════════════════════════════════════════════════ */
+  function togglePwd(key, inputId) {
+    passwordVisible[key] = !passwordVisible[key];
+    const input  = document.getElementById(inputId);
+    const toggle = document.querySelector(`#${inputId}`.replace('#', '#').split('-').map((_, i, a) => i < a.length - 1 ? a[i] : 'toggle').join('-') + '-btn') ||
+                   document.querySelector(`[id$="${key === 'login' ? 'login-password-toggle' : key + '-password-toggle'}"]`);
+    if (input) input.type = passwordVisible[key] ? 'text' : 'password';
 
-    setTimeout(() => {
-      btn.classList.remove('loading');
-
-      const cred = demoCredentials[currentRole];
-
-      // Support demo credentials or any validly formatted credentials
-      const isDemo = email.toLowerCase() === cred.email.toLowerCase() && password === cred.password;
-      const isValidRegistered = isValidEmail(email) && password.length >= 6;
-
-      if (isDemo || isValidRegistered) {
-        const userName = isDemo ? cred.name : (email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase()));
-        
-        showMessage('success', `Welcome, ${userName}! Redirecting to your dashboard...`);
-
-        try {
-          sessionStorage.setItem('fittrack_user', JSON.stringify({
-            name: userName,
-            email: email,
-            role: currentRole,
-            loggedIn: true,
-            loginTime: new Date().toISOString(),
-          }));
-        } catch (e) {
-          // ignore
-        }
-
-        setTimeout(() => {
-          window.location.href = cred.redirect;
-        }, 1200);
-      } else {
-        showMessage('error', 'Invalid email or password. Please check your credentials or click Quick Demo Login below.');
-
-        const card = document.querySelector('.login-card');
-        if (card) {
-          card.style.animation = 'none';
-          card.offsetHeight;
-          card.style.animation = 'cardShake 0.5s ease';
-          setTimeout(() => { card.style.animation = ''; }, 500);
-        }
-      }
-    }, 1000);
+    // Find the toggle button for this field
+    const btn = input?.parentElement.querySelector('.login-password-toggle');
+    if (btn) btn.innerHTML = passwordVisible[key] ? Icons.eyeOff : Icons.eye;
   }
 
-  /* ── Validation Helpers ── */
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  function validatePassword(pwd) {
+    return pwd.length >= 8 && /[a-z]/.test(pwd) && /[A-Z]/.test(pwd) && /\d/.test(pwd);
   }
 
-  function showFieldError(field, message) {
-    const fieldEl = document.getElementById(`field-${field}`);
-    const errorEl = document.getElementById(`${field}-error`) || (fieldEl ? fieldEl.querySelector('.field-error') : null);
+  function validatePhone(phone) {
+    const clean = phone.replace(/[\s\-\(\)\+]/g, '');
+    return /^\d{7,15}$/.test(clean);
+  }
+
+  function isEmail(str) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+  }
+
+  function val(id) {
+    return (document.getElementById(id)?.value || '').trim();
+  }
+
+  function on(id, evt, fn) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(evt, fn);
+  }
+
+  function setDisplay(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = val;
+  }
+
+  function showFieldError(fieldSuffix, msg) {
+    // Map field id to field container id
+    const fieldMap = {
+      'email':              'field-email',
+      'password':           'field-password',
+      'reg-name':           'field-reg-name',
+      'reg-email':          'field-reg-email',
+      'reg-phone':          'field-reg-phone',
+      'reg-password':       'field-reg-password',
+      'reg-confirm-password': 'field-reg-confirm-password',
+      'forgot-email':       'field-forgot-email',
+      'reset-password':     'field-reset-password',
+      'reset-confirm-password': 'field-reset-confirm-password',
+    };
+
+    const fieldEl = document.getElementById(fieldMap[fieldSuffix]);
+    const errorEl = document.getElementById(`${fieldSuffix}-error`);
+
     if (fieldEl) fieldEl.classList.add('error');
-    if (errorEl) errorEl.textContent = message;
+    if (errorEl) errorEl.textContent = msg;
   }
 
-  function clearFieldError(field) {
-    const fieldEl = document.getElementById(`field-${field}`);
+  function clearFieldError(fieldSuffix) {
+    const fieldMap = {
+      'email':              'field-email',
+      'password':           'field-password',
+      'reg-name':           'field-reg-name',
+      'reg-email':          'field-reg-email',
+      'reg-phone':          'field-reg-phone',
+      'reg-password':       'field-reg-password',
+      'confirm-password':   'field-reg-confirm-password',
+      'forgot-email':       'field-forgot-email',
+      'reset-password':     'field-reset-password',
+      'reset-confirm-password': 'field-reset-confirm-password',
+    };
+    const fieldEl = document.getElementById(fieldMap[fieldSuffix]);
     if (fieldEl) fieldEl.classList.remove('error');
   }
 
-  function clearAllFieldErrors() {
-    document.querySelectorAll('.login-field').forEach(f => f.classList.remove('error'));
+  function clearAllErrors() {
+    document.querySelectorAll('.login-field.error').forEach(f => f.classList.remove('error'));
   }
 
-  function showMessage(type, message) {
-    hideMessages();
-    const el = document.getElementById(`login-${type}`);
+  function showAlert(type, msg) {
+    hideAlerts();
+    const el     = document.getElementById(`login-${type}`);
     const textEl = document.getElementById(`login-${type}-text`);
-    if (textEl) textEl.textContent = message;
-    if (el) el.classList.add('visible');
+    if (textEl) textEl.textContent = msg;
+    if (el)     el.classList.add('visible');
   }
 
-  function hideMessages() {
-    const err = document.getElementById('login-error');
-    const succ = document.getElementById('login-success');
-    if (err) err.classList.remove('visible');
-    if (succ) succ.classList.remove('visible');
+  function hideAlerts() {
+    ['login-error', 'login-success'].forEach(id => document.getElementById(id)?.classList.remove('visible'));
   }
 
-  /* ── Add shake animation to head ── */
+  function shakeCard() {
+    const card = document.querySelector('.login-card');
+    if (!card) return;
+    card.style.animation = 'none';
+    card.offsetHeight;
+    card.style.animation = 'cardShake 0.5s ease';
+    setTimeout(() => { card.style.animation = ''; }, 500);
+  }
+
   function injectShakeAnimation() {
-    const style = document.createElement('style');
-    style.textContent = `
+    const s = document.createElement('style');
+    s.textContent = `
       @keyframes cardShake {
         0%, 100% { transform: translateX(0); }
         10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-        20%, 40%, 60%, 80% { transform: translateX(5px); }
+        20%, 40%, 60%, 80%      { transform: translateX(5px); }
       }
     `;
-    document.head.appendChild(style);
+    document.head.appendChild(s);
   }
 
-  /* ── Initialize ── */
+  /* API fetch wrapper */
+  async function apiFetch(url, body) {
+    const res = await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(body)
+    });
+    return res.json();
+  }
+
+  /* ═══════════════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════════════ */
   function init() {
-    injectShakeAnimation();
     render();
   }
 
@@ -793,5 +1121,4 @@ const LoginApp = (() => {
 
 })();
 
-// Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', LoginApp.init);
