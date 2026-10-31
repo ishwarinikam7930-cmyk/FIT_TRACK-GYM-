@@ -153,7 +153,7 @@ const Dashboard = {
       if (['profile', 'my-profile'].includes(hash)) return 'profile';
       if (['goal', 'my-goal', 'goals'].includes(hash)) return 'goal';
       if (['trainers', 'find-trainers', 'coach'].includes(hash)) return 'trainers';
-      if (['plans', 'compare-plans', 'pricing'].includes(hash)) return 'plans';
+      if (['plans', 'compare-plans', 'pricing'].includes(hash)) return 'trainers';
       if (['my_plan', 'my-plan', 'purchase'].includes(hash)) return 'my_plan';
       if (['activities', 'workout', 'workouts', 'diet', 'nutrition'].includes(hash)) return 'activities';
       if (['sessions', 'video-sessions', 'schedule', 'video'].includes(hash)) return 'sessions';
@@ -164,6 +164,15 @@ const Dashboard = {
       if (['settings', 'account'].includes(hash)) return 'settings';
       return hash;
     }
+  },
+
+  /* ── Time-based Responsive Greeting ── */
+  getTimeGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Good morning';
+    if (hour >= 12 && hour < 17) return 'Good afternoon';
+    if (hour >= 17 && hour < 22) return 'Good evening';
+    return 'Welcome';
   },
 
   /* ── Initialize active role ── */
@@ -180,8 +189,8 @@ const Dashboard = {
       this.currentView = this.mapHashToView(rawHash, 'trainer');
       const user = Auth.getUser() || {};
       user.role = 'trainer';
-      user.name = user.name || 'Coach Rahul Mehta';
-      user.email = user.email || 'rahul.mehta@fittrack.com';
+      user.name = user.name || 'Coach';
+      user.email = user.email || 'coach@fittrack.com';
       user.loggedIn = true;
       try { sessionStorage.setItem('fittrack_user', JSON.stringify(user)); } catch (e) {}
     } else if (isUserPage || roleParam === 'user') {
@@ -189,8 +198,8 @@ const Dashboard = {
       this.currentView = this.mapHashToView(rawHash, 'user');
       const user = Auth.getUser() || {};
       user.role = 'user';
-      user.name = user.name || 'Ishwari Nikam';
-      user.email = user.email || 'ishwari.nikam@email.com';
+      user.name = user.name || 'Member';
+      user.email = user.email || 'member@fittrack.com';
       user.loggedIn = true;
       try { sessionStorage.setItem('fittrack_user', JSON.stringify(user)); } catch (e) {}
     } else {
@@ -202,6 +211,10 @@ const Dashboard = {
         this.currentRole = 'user';
         this.currentView = this.mapHashToView(rawHash, 'user');
       }
+    }
+
+    if (typeof FitTrackData !== 'undefined' && FitTrackData.syncWithSessionUser) {
+      FitTrackData.syncWithSessionUser();
     }
 
     if (typeof FitTrackData !== 'undefined') {
@@ -332,10 +345,8 @@ const Dashboard = {
           viewHtml = this.renderGoalView();
           break;
         case 'trainers':
-          viewHtml = this.renderTrainersView();
-          break;
         case 'plans':
-          viewHtml = this.renderPlansView();
+          viewHtml = this.renderTrainersView();
           break;
         case 'my_plan':
           viewHtml = this.renderMyPlanView();
@@ -407,6 +418,11 @@ const Dashboard = {
     const reviews = FitTrackData.clientProgressReviews;
     const plans = FitTrackData.trainerPublishedPlans;
 
+    const sessionUser = Auth.getUser();
+    const trainerFullName = (sessionUser && sessionUser.name) ? sessionUser.name : (trainer.fullName || 'Coach');
+    const trainerFirstName = trainerFullName.replace(/^Coach\s+/i, '').split(' ')[0] || 'Coach';
+    const greeting = this.getTimeGreeting();
+
     return `
       <!-- Trainer Welcome Hero Banner -->
       <section class="welcome-hero animate-fade-in-up" style="background: linear-gradient(135deg, #065F46 0%, #047857 50%, #1E293B 100%);">
@@ -414,7 +430,7 @@ const Dashboard = {
           <div class="welcome-hero__badge" style="color:#A7F3D0;">
             ${Components.icon('shield')} <span>FITTRACK TRAINER COMMAND PORTAL</span>
           </div>
-          <h1 class="welcome-hero__heading">Welcome back, Rahul! 🏋️‍♂️</h1>
+          <h1 class="welcome-hero__heading">${greeting}, ${trainerFirstName}! 🏋️‍♂️</h1>
           <p class="welcome-hero__subtext">
             You are actively coaching <strong>${trainer.activeClientsCount} enrolled clients</strong> with a <strong>${trainer.rating} ★★★★★</strong> rating. 
             You have <strong>${sessions.length} 1-on-1 video sessions</strong> scheduled this week.
@@ -909,77 +925,95 @@ const Dashboard = {
   },
 
   /* ── 5. MY PLANS (CREATE & MANAGE PLANS DIRECTLY) ── */
+  /* ── 5. TRAINER PUBLISHED PROGRAMMES (DURATION-BASED STOREFRONT) ── */
   renderTrainerPlansView() {
-    const plans = FitTrackData.trainerPublishedPlans;
+    const plans = FitTrackData.trainerPublishedPlans || [];
 
     return `
       <div class="view-header">
         <div>
-          <h1 class="view-title">${Components.icon('plans')} My Training Plans & Storefront</h1>
-          <p class="view-subtitle">Create signature training blueprints and publish packages directly to members without waiting for approvals</p>
+          <h1 class="view-title">${Components.icon('plans')} My Fitness Programmes & Pricing</h1>
+          <p class="view-subtitle">Create complete duration-based programmes, set your own prices in ₹, and publish directly to members</p>
         </div>
       </div>
 
       <div class="two-column">
-        <!-- Create Plan Form -->
+        <!-- Create Programme Form -->
         <div class="card card--flat">
-          <h3 class="card__title mb-4">Create & Publish New Plan</h3>
+          <h3 class="card__title mb-4">Create New Duration-Based Programme</h3>
           <form id="form-create-plan" onsubmit="event.preventDefault(); Dashboard.handleCreatePlan();">
             <div class="form-group">
-              <label class="form-label" for="new-plan-title">Plan Package Title</label>
-              <input type="text" class="form-input" id="new-plan-title" placeholder="e.g. 8-Week Core & Athletic Power" required>
+              <label class="form-label" for="new-plan-title">Programme Name <span class="required">*</span></label>
+              <input type="text" class="form-input" id="new-plan-title" placeholder="e.g. 3 Months Fat Loss & Muscle Sculpt" required>
             </div>
 
             <div class="profile-form-grid">
               <div class="form-group">
-                <label class="form-label" for="new-plan-tier">Coaching Tier</label>
-                <select class="form-input" id="new-plan-tier">
-                  <option value="Pro Coaching">Pro Coaching ($59/mo)</option>
-                  <option value="Elite Coaching">Elite Coaching ($99/mo)</option>
-                  <option value="Starter Access">Starter Access ($39/mo)</option>
+                <label class="form-label" for="new-plan-category">Programme Category <span class="required">*</span></label>
+                <select class="form-input" id="new-plan-category">
+                  <option value="Weight Loss">Weight Loss</option>
+                  <option value="Muscle Gain">Muscle Gain / Hypertrophy</option>
+                  <option value="Strength & Conditioning">Strength & Conditioning</option>
+                  <option value="HIIT & Fat Loss">HIIT & Fat Loss</option>
+                  <option value="Yoga & Mobility">Yoga & Mobility</option>
+                  <option value="General Fitness">General Fitness & Longevity</option>
                 </select>
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="new-plan-dur">Program Duration</label>
+                <label class="form-label" for="new-plan-dur">Programme Duration <span class="required">*</span></label>
                 <select class="form-input" id="new-plan-dur">
-                  <option value="4 Weeks (30 Days)">4 Weeks (30 Days)</option>
-                  <option value="6 Weeks (42 Days)">6 Weeks (42 Days)</option>
-                  <option value="8 Weeks (56 Days)">8 Weeks (56 Days)</option>
-                  <option value="12 Weeks (90 Days)">12 Weeks (90 Days)</option>
+                  <option value="1 Month">1 Month</option>
+                  <option value="3 Months" selected>3 Months</option>
+                  <option value="6 Months">6 Months</option>
+                  <option value="12 Months">12 Months</option>
                 </select>
               </div>
             </div>
 
             <div class="form-group mt-3">
-              <label class="form-label" for="new-plan-workout">Workout Features Included</label>
-              <input type="text" class="form-input" id="new-plan-workout" placeholder="e.g. 5-Day Push/Pull/Legs Split, Form Checks" required>
+              <label class="form-label" for="new-plan-price">Total Programme Price (₹) <span class="required">*</span></label>
+              <div style="position:relative;">
+                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-weight:700;color:var(--text-muted);font-size:var(--text-base);">₹</span>
+                <input type="number" class="form-input" id="new-plan-price" placeholder="e.g. 2999" min="1" step="1" style="padding-left:30px;" required>
+              </div>
+              <small style="color:var(--text-muted);font-size:11px;margin-top:4px;display:block;">You set your own price. FitTrack charges ₹0 platform fee. You receive 100% of the listed price.</small>
+            </div>
+
+            <div class="form-group mt-3">
+              <label class="form-label" for="new-plan-workout">Workout Programme Details</label>
+              <input type="text" class="form-input" id="new-plan-workout" placeholder="e.g. 5-Day Push/Pull/Legs Split, Form Analysis, Progressive Loading" required>
             </div>
 
             <div class="form-group mt-3">
               <label class="form-label" for="new-plan-diet">Diet & Nutrition Guidance</label>
-              <input type="text" class="form-input" id="new-plan-diet" placeholder="e.g. Custom Macro Blueprint with Weekly Adjustments" required>
+              <input type="text" class="form-input" id="new-plan-diet" placeholder="e.g. Custom Macro Blueprint with Bi-weekly Adjustments" required>
             </div>
 
             <div class="form-group mt-3">
-              <label class="form-label" for="new-plan-desc">Plan Overview & Methodology</label>
-              <textarea class="form-textarea" id="new-plan-desc" rows="3" placeholder="Outline splits, target audience, and progression philosophy..." required></textarea>
+              <label class="form-label" for="new-plan-benefits">Features & Benefits (Comma separated)</label>
+              <input type="text" class="form-input" id="new-plan-benefits" placeholder="e.g. Direct WhatsApp Chat, Video Form Audits, Progress Reviews" required>
+            </div>
+
+            <div class="form-group mt-3">
+              <label class="form-label" for="new-plan-desc">Programme Description & Methodology</label>
+              <textarea class="form-textarea" id="new-plan-desc" rows="3" placeholder="Outline goals, target audience, and training philosophy..." required></textarea>
             </div>
 
             <div style="background:#ECFDF5;border:1px solid #A7F3D0;padding:var(--space-3);border-radius:var(--radius-md);margin-top:var(--space-3);font-size:var(--text-xs);color:#065F46;">
-              ⚡ <strong>Instant Self-Service Publishing:</strong> Plans you publish are immediately visible to members for direct enrollment and checkout.
+              ⚡ <strong>Direct Self-Service Publishing:</strong> This complete duration-based programme will immediately appear on your profile in "Find Trainers" for members to view and purchase.
             </div>
 
             <button type="submit" class="btn btn--primary mt-4" style="width:100%;">
-              ${Components.icon('checkCircle')} Publish Plan Directly
+              ${Components.icon('checkCircle')} Publish Programme
             </button>
           </form>
         </div>
 
-        <!-- Published & Draft Plans -->
+        <!-- Published & Draft Programmes -->
         <div class="card card--flat">
           <div class="card__header">
-            <h3 class="card__title">My Coaching Plans</h3>
+            <h3 class="card__title">My Active Programmes</h3>
             <span class="badge badge--emerald">${plans.filter(p => p.status === 'Published').length} Active Live</span>
           </div>
           <div class="flex flex-col gap-4" id="trainer-plans-list">
@@ -989,7 +1023,7 @@ const Dashboard = {
                   <div>
                     <span class="badge ${p.status === 'Published' ? 'badge--emerald' : 'badge--gray'}">${p.status}</span>
                     <h4 style="font-weight:700;font-size:var(--text-base);margin-top:6px;">${p.title}</h4>
-                    <div style="font-size:var(--text-xs);color:var(--text-muted);">${p.tier} · ${p.duration} · <strong>${p.price}</strong></div>
+                    <div style="font-size:var(--text-xs);color:var(--text-muted);">${p.category || 'Fitness'} · ${p.duration} · <strong style="color:var(--color-primary);font-size:var(--text-sm);">${p.formattedPrice || '₹' + p.price}</strong></div>
                   </div>
                   <div style="text-align:right;">
                     <span style="font-weight:700;color:var(--color-primary);font-size:var(--text-sm);">${p.enrolledCount} Enrolled</span>
@@ -2268,6 +2302,11 @@ const Dashboard = {
     const sessions = FitTrackData.upcomingSessions;
     const progress = FitTrackData.progressData;
 
+    const sessionUser = Auth.getUser();
+    const userFullName = (sessionUser && sessionUser.name) ? sessionUser.name : (user.fullName || user.name || 'Member');
+    const userFirstName = userFullName.split(' ')[0] || 'Member';
+    const greeting = this.getTimeGreeting();
+
     const completedExCount = workout.exercises.filter(e => e.completed).length;
     const workoutPercent = Math.round((completedExCount / workout.exercises.length) * 100);
 
@@ -2278,7 +2317,7 @@ const Dashboard = {
           <div class="welcome-hero__badge">
             ${Components.icon('checkCircle')} <span>FITTRACK USER COMMAND CENTER</span>
           </div>
-          <h1 class="welcome-hero__heading">Welcome back, ${user.name}! 💪</h1>
+          <h1 class="welcome-hero__heading">${greeting}, ${userFirstName}! 💪</h1>
           <p class="welcome-hero__subtext">
             You're currently on <strong>Day 16 of 30</strong> of your <strong>${plan.name}</strong> plan.
             Primary Goal: <strong>${goal.title}</strong> (<strong>${goal.progressPercentage}%</strong> achieved).
@@ -2325,7 +2364,7 @@ const Dashboard = {
         ${Components.metricCard({ label: 'Active Trainer', value: trainer.shortName, detail: '4.9 ★ Strength Specialist', icon: 'trainers', colorClass: 'blue', delay: 2 })}
         ${Components.metricCard({ label: 'Next Session', value: 'Today, 6:00 PM', detail: '1-on-1 Video Coaching Call', icon: 'video', colorClass: 'purple', delay: 3 })}
         ${Components.metricCard({ label: 'Progress Tracking', value: `${user.weight} kg`, detail: 'Down 3.5 kg · Target 58 kg', icon: 'fire', colorClass: 'amber', delay: 4 })}
-        ${Components.metricCard({ label: 'Goal Completion', value: `${goal.progressPercentage}%`, detail: 'Target: December 2026', icon: 'trophy', colorClass: 'emerald', delay: 5 })}
+        ${Components.metricCard({ label: 'Goal Completion', value: `${goal.progressPercentage}%`, detail: `Target: ${this.formatGoalDate(goal.targetDate)}`, icon: 'trophy', colorClass: 'emerald', delay: 5 })}
       </div>
 
       <!-- 4. MY FITNESS GOAL (Dedicated Card) -->
@@ -2336,7 +2375,7 @@ const Dashboard = {
             <h2 class="card__title" style="display:flex;align-items:center;gap:var(--space-2);margin-top:2px;">
               ${Components.icon('goal')} Current Goal: ${goal.title}
             </h2>
-            <p class="card__subtitle">${goal.goalType} · Target Date: <strong>December 2026</strong></p>
+            <p class="card__subtitle">${goal.goalType} · Target Date: <strong>${this.formatGoalDate(goal.targetDate)}</strong></p>
           </div>
           <div style="display:flex;gap:var(--space-2);align-items:center;">
             <span class="badge badge--emerald" style="font-size:var(--text-xs);padding:6px 12px;">● Status: On Track</span>
@@ -2361,20 +2400,6 @@ const Dashboard = {
           </div>
         </div>
 
-        <!-- Milestones Snippet -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:var(--space-3);">
-          ${goal.milestones.slice(0, 3).map(m => `
-            <div style="border:1px solid var(--border-light);border-radius:var(--radius-md);padding:var(--space-3);background:var(--bg-surface);display:flex;align-items:center;gap:var(--space-3);cursor:pointer;" onclick="Dashboard.toggleMilestone('${m.id}')">
-              <div style="width:28px;height:28px;border-radius:var(--radius-full);display:flex;align-items:center;justify-content:center;background:${m.completed ? '#ECFDF5' : 'var(--border-light)'};color:${m.completed ? '#059669' : 'var(--text-muted)'};font-weight:700;font-size:12px;">
-                ${m.completed ? '✓' : '○'}
-              </div>
-              <div>
-                <div style="font-weight:600;font-size:var(--text-xs);color:var(--text-primary);${m.completed ? 'text-decoration:line-through;opacity:0.75;' : ''}">${m.title}</div>
-                <div style="font-size:10px;color:var(--text-muted);">${m.date}</div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
       </div>
 
       <!-- 5. MY TRAINER & 6. MY PLAN (Two Column Layout) -->
@@ -2818,7 +2843,7 @@ const Dashboard = {
       <div class="view-header">
         <div>
           <h1 class="view-title">${Components.icon('goal')} Define a Fitness Goal</h1>
-          <p class="view-subtitle">Set clear measurable targets, caloric thresholds, and milestone checkpoints</p>
+          <p class="view-subtitle">Set clear measurable targets, caloric thresholds, and a target deadline</p>
         </div>
         <button class="btn btn--primary" id="btn-save-goal" onclick="Dashboard.handleSaveGoal()">
           ${Components.icon('check')} Save Goal
@@ -2830,7 +2855,7 @@ const Dashboard = {
           <div>
             <span class="badge badge--emerald mb-2">Active Goal Program</span>
             <h2 style="font-size:var(--text-2xl);font-weight:700;color:#fff;">${goal.title}</h2>
-            <p style="font-size:var(--text-sm);color:rgba(255,255,255,0.8);">${goal.goalType} · Started on ${goal.startDate} · Target: ${goal.targetDate}</p>
+            <p style="font-size:var(--text-sm);color:rgba(255,255,255,0.8);">${goal.goalType} · Started on ${this.formatGoalDate(goal.startDate)} · Target: ${this.formatGoalDate(goal.targetDate)}</p>
           </div>
           <div style="text-align:right;">
             <span style="font-size:var(--text-3xl);font-weight:800;color:var(--color-emerald-400);">${goal.progressPercentage}%</span>
@@ -2857,13 +2882,12 @@ const Dashboard = {
           </div>
           <div class="goal-stat-item">
             <div class="goal-stat-item__label">Days Remaining</div>
-            <div class="goal-stat-item__val">${goal.totalDays - goal.daysElapsed} days</div>
+            <div class="goal-stat-item__val">${Math.max(0, goal.totalDays - goal.daysElapsed)} days</div>
           </div>
         </div>
       </div>
 
-      <div class="two-column">
-        <div class="card card--flat">
+      <div class="card card--flat">
           <h3 class="card__title mb-4">Goal Parameters</h3>
           <form id="form-goal" onsubmit="event.preventDefault(); Dashboard.handleSaveGoal();">
             <div class="form-group">
@@ -2874,11 +2898,7 @@ const Dashboard = {
             <div class="form-group">
               <label class="form-label" for="goal-type">Primary Focus Type</label>
               <select class="form-input" id="goal-type">
-                <option value="Fat Loss & Muscle Toning" selected>Fat Loss & Muscle Toning</option>
-                <option value="Hypertrophy & Muscle Gain">Hypertrophy & Muscle Gain</option>
-                <option value="Strength & Powerlifting">Strength & Powerlifting</option>
-                <option value="Endurance & Cardiovascular">Endurance & Cardiovascular</option>
-                <option value="Mobility & Flexibility">Mobility & Flexibility</option>
+                ${this.renderGoalTypeOptions(goal.goalType)}
               </select>
             </div>
 
@@ -2896,10 +2916,10 @@ const Dashboard = {
               <div class="form-group">
                 <label class="form-label" for="goal-workouts-week">Workouts / Week</label>
                 <select class="form-input" id="goal-workouts-week">
-                  <option value="3">3 Days (Full Body)</option>
-                  <option value="4">4 Days (Upper / Lower)</option>
-                  <option value="5" selected>5 Days (Push / Pull / Legs)</option>
-                  <option value="6">6 Days (Advanced PPL)</option>
+                  <option value="3" ${Number(goal.targetWorkoutsPerWeek) === 3 ? 'selected' : ''}>3 Days (Full Body)</option>
+                  <option value="4" ${Number(goal.targetWorkoutsPerWeek) === 4 ? 'selected' : ''}>4 Days (Upper / Lower)</option>
+                  <option value="5" ${Number(goal.targetWorkoutsPerWeek) === 5 ? 'selected' : ''}>5 Days (Push / Pull / Legs)</option>
+                  <option value="6" ${Number(goal.targetWorkoutsPerWeek) === 6 ? 'selected' : ''}>6 Days (Advanced PPL)</option>
                 </select>
               </div>
 
@@ -2912,37 +2932,13 @@ const Dashboard = {
             <button type="submit" class="btn btn--primary mt-4" style="width:100%;">Update & Commit Goal</button>
           </form>
         </div>
-
-        <div class="card card--flat">
-          <div class="card__header">
-            <h3 class="card__title">Milestone Checkpoints</h3>
-            <span class="badge badge--emerald">${goal.milestones.filter(m => m.completed).length} of ${goal.milestones.length} Reached</span>
-          </div>
-          <p class="card__subtitle mb-4">Key progressive markers to celebrate along your journey</p>
-
-          <div class="milestones-list" id="milestones-list">
-            ${goal.milestones.map(m => `
-              <div class="milestone-item ${m.completed ? 'completed' : ''}" data-milestone-id="${m.id}" onclick="Dashboard.toggleMilestone('${m.id}')">
-                <div class="milestone-item__check">
-                  ${m.completed ? Components.icon('check') : ''}
-                </div>
-                <div style="flex:1;">
-                  <div style="font-weight:600;font-size:var(--text-sm);color:var(--text-primary);">${m.title}</div>
-                  <div style="font-size:var(--text-xs);color:var(--text-muted);">${m.target} · ${m.date}</div>
-                </div>
-                ${m.completed ? '<span class="badge badge--emerald" style="font-size:10px;">DONE</span>' : '<span class="badge badge--gray" style="font-size:10px;">PENDING</span>'}
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
     `;
   },
 
-  /* ── 4. BROWSE TRAINERS VIEW ── */
+  /* ── 4. BROWSE TRAINERS & DURATION-BASED PROGRAMMES ── */
   renderTrainersView() {
-    const trainers = FitTrackData.trainersList;
-    const filter = this.selectedTrainerFilter;
+    const trainers = FitTrackData.trainersList || [];
+    const filter = this.selectedTrainerFilter || 'all';
     const filteredTrainers = filter === 'all' 
       ? trainers 
       : trainers.filter(t => t.category === filter);
@@ -2950,12 +2946,9 @@ const Dashboard = {
     return `
       <div class="view-header">
         <div>
-          <h1 class="view-title">${Components.icon('trainers')} Browse Certified Trainers</h1>
-          <p class="view-subtitle">Select an expert coach for personalized 1-on-1 guidance, workout programming, and video sessions</p>
+          <h1 class="view-title">${Components.icon('trainers')} Find Expert Trainers & Fitness Programmes</h1>
+          <p class="view-subtitle">Browse certified trainers and their duration-based fitness programmes. Each trainer sets their own transparent programme price with ₹0 platform fees.</p>
         </div>
-        <button class="btn btn--primary" onclick="Dashboard.navigate('sessions')">
-          ${Components.icon('calendar')} Book a Session
-        </button>
       </div>
 
       <div class="filter-tabs">
@@ -2966,99 +2959,89 @@ const Dashboard = {
         <button class="filter-btn ${filter === 'nutrition' ? 'active' : ''}" onclick="Dashboard.filterTrainers('nutrition')">Nutrition & Diet</button>
       </div>
 
-      <div class="trainers-grid">
-        ${filteredTrainers.map(t => `
-          <div class="trainer-card">
-            ${t.isAssigned ? '<span class="badge badge--emerald" style="position:absolute;top:16px;right:16px;">Assigned Coach</span>' : ''}
-            <div class="trainer-card__header">
-              <div class="trainer-card__avatar" style="background:${t.avatarBg};">${t.avatarInitials}</div>
+      <div class="trainers-grid" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: var(--space-6);">
+        ${filteredTrainers.map(t => {
+          const progs = t.programmes || [];
+          return `
+            <div class="trainer-card" style="display:flex;flex-direction:column;justify-content:space-between;padding:var(--space-6);border-radius:var(--radius-xl);background:var(--bg-surface);box-shadow:var(--shadow-sm);border:1px solid var(--border-light);position:relative;">
+              ${t.isAssigned ? '<span class="badge badge--emerald" style="position:absolute;top:16px;right:16px;font-size:11px;">Current Coach</span>' : ''}
+              
               <div>
-                <h3 style="font-weight:700;font-size:var(--text-base);">${t.name}</h3>
-                <div style="font-size:var(--text-xs);color:var(--text-muted);">${t.title}</div>
-                <div style="display:flex;align-items:center;gap:4px;margin-top:2px;font-size:var(--text-xs);color:#F59E0B;font-weight:600;">
-                  ${Components.icon('star')} ${t.rating} <span style="color:var(--text-muted);font-weight:400;">(${t.reviewsCount} reviews)</span>
+                <div class="trainer-card__header" style="margin-bottom:var(--space-4);">
+                  <div class="trainer-card__avatar" style="background:${t.avatarBg};width:54px;height:54px;font-size:var(--text-lg);font-weight:800;">${t.avatarInitials}</div>
+                  <div>
+                    <h3 style="font-weight:700;font-size:var(--text-lg);color:var(--text-primary);">${t.name}</h3>
+                    <div style="font-size:var(--text-xs);color:var(--text-muted);">${t.title}</div>
+                    <div style="display:flex;align-items:center;gap:4px;margin-top:2px;font-size:var(--text-xs);color:#F59E0B;font-weight:600;">
+                      ${Components.icon('star')} ${t.rating} <span style="color:var(--text-muted);font-weight:400;">(${t.reviewsCount} verified reviews)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p style="font-size:var(--text-xs);color:var(--text-secondary);line-height:1.6;margin-bottom:var(--space-3);">${t.bio}</p>
+
+                <div class="trainer-card__badges" style="margin-bottom:var(--space-4);">
+                  ${t.tags.map(tag => `<span class="trainer-tag">${tag}</span>`).join('')}
+                </div>
+
+                <!-- Duration-Based Programmes Section -->
+                <div style="border-top:1px solid var(--border-light);padding-top:var(--space-4);margin-top:var(--space-2);">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-3);">
+                    <h4 style="font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.05em;color:var(--text-primary);font-weight:800;display:flex;align-items:center;gap:6px;">
+                      ${Components.icon('plans')} Available Programmes (${progs.length})
+                    </h4>
+                    <span style="font-size:11px;color:var(--color-primary);font-weight:600;">₹0 Platform Fee</span>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+                    ${progs.map(p => `
+                      <div style="border:1px solid var(--border-light);border-radius:var(--radius-lg);padding:var(--space-3);background:var(--bg-surface-hover);transition:all 0.2s ease;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                          <div>
+                            <div style="font-weight:700;font-size:var(--text-xs);color:var(--text-primary);line-height:1.3;">${p.title}</div>
+                            <div style="display:flex;align-items:center;gap:8px;margin-top:3px;font-size:11px;color:var(--text-muted);">
+                              <span class="badge badge--purple" style="font-size:10px;padding:1px 6px;">${p.duration}</span>
+                              <span>${p.category || 'Fitness'}</span>
+                            </div>
+                          </div>
+                          <div style="text-align:right;white-space:nowrap;">
+                            <div style="font-size:var(--text-base);font-weight:800;color:var(--color-primary);">₹${p.price.toLocaleString('en-IN')}</div>
+                            <span style="font-size:10px;color:var(--text-muted);">Total Programme Fee</span>
+                          </div>
+                        </div>
+
+                        <div style="font-size:11px;color:var(--text-secondary);margin-top:6px;line-height:1.4;">
+                          ${p.workoutFeatures}
+                        </div>
+
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:6px;border-top:1px dashed var(--border-light);">
+                          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            ${(p.benefits || []).slice(0, 2).map(b => `<span style="font-size:10px;color:var(--color-emerald-700);background:#ECFDF5;padding:2px 6px;border-radius:4px;">✓ ${b}</span>`).join('')}
+                          </div>
+                          <button class="btn btn--primary btn--sm" style="font-size:11px;padding:4px 12px;" onclick="Dashboard.openPurchaseModal('${p.id}')">
+                            Select Programme
+                          </button>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <p style="font-size:var(--text-sm);color:var(--text-secondary);line-height:var(--leading-relaxed);margin-bottom:var(--space-3);">${t.bio}</p>
-
-            <div class="trainer-card__badges">
-              ${t.tags.map(tag => `<span class="trainer-tag">${tag}</span>`).join('')}
-            </div>
-
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--border-light);font-size:var(--text-xs);">
-              <span><strong>Experience:</strong> ${t.experience}</span>
-              <span style="font-weight:700;color:var(--color-primary);">${t.rate}</span>
-            </div>
-
-            <div class="trainer-card__actions">
-              <button class="btn btn--primary btn--sm" style="flex:1;" onclick="Dashboard.bookWithTrainer('${t.name}')">Book Session</button>
-              <button class="btn btn--secondary btn--sm" onclick="Dashboard.reviewTrainer('${t.name}')">Review</button>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  },
-
-  /* ── 5. COMPARE PLANS VIEW ── */
-  renderPlansView() {
-    const plans = FitTrackData.plansList;
-    const isYearly = this.selectedBilling === 'yearly';
-
-    return `
-      <div class="view-header">
-        <div>
-          <h1 class="view-title">${Components.icon('plans')} Compare & Purchase Plans</h1>
-          <p class="view-subtitle">Select the membership tier that suits your goals with transparent pricing and instant activation</p>
-        </div>
-      </div>
-
-      <div class="billing-toggle-container">
-        <span style="font-size:var(--text-sm);font-weight:${!isYearly ? '700' : '400'};color:${!isYearly ? 'var(--text-primary)' : 'var(--text-muted)'};">Monthly Billing</span>
-        <button class="btn btn--secondary btn--sm" style="border-radius:var(--radius-full);" onclick="Dashboard.toggleBillingCycle()">
-          ${isYearly ? 'Switch to Monthly' : 'Switch to Annual (Save 20%)'}
-        </button>
-        <span style="font-size:var(--text-sm);font-weight:${isYearly ? '700' : '400'};color:${isYearly ? 'var(--color-emerald-700)' : 'var(--text-muted)'};">
-          Annual Billing <span class="badge badge--emerald" style="font-size:10px;">SAVE 20%</span>
-        </span>
-      </div>
-
-      <div class="plans-grid">
-        ${plans.map(p => {
-          const price = isYearly ? Math.round(p.priceYearly / 12) : p.priceMonthly;
-          const billingNote = isYearly ? `$${p.priceYearly}/yr billed annually` : 'billed monthly';
-
-          return `
-            <div class="plan-card ${p.isCurrent ? 'featured' : ''}">
-              ${p.badge ? `<div class="plan-card__badge">${p.badge}</div>` : ''}
-              <h3 style="font-size:var(--text-xl);font-weight:700;">${p.name}</h3>
-              <p style="font-size:var(--text-xs);color:var(--text-muted);margin-top:4px;min-height:36px;">${p.description}</p>
-
-              <div class="plan-card__price">
-                $${price}<span>/month</span>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:var(--space-4);padding-top:var(--space-3);border-top:1px solid var(--border-light);font-size:var(--text-xs);">
+                <span><strong>Experience:</strong> ${t.experience}</span>
+                <button class="btn btn--secondary btn--sm" style="font-size:11px;padding:4px 10px;" onclick="Dashboard.reviewTrainer('${t.name}')">Leave Review</button>
               </div>
-              <div style="font-size:var(--text-xs);color:var(--text-muted);">${billingNote}</div>
-
-              <div class="plan-feature-list">
-                ${p.features.map(f => `
-                  <div class="plan-feature-item ${f.included ? 'included' : 'excluded'}">
-                    ${f.included ? Components.icon('checkCircle') : Components.icon('x')}
-                    <span>${f.text}</span>
-                  </div>
-                `).join('')}
-              </div>
-
-              ${p.isCurrent 
-                ? '<button class="btn btn--secondary" style="width:100%;cursor:default;border-color:var(--color-primary);color:var(--color-primary);">Current Active Plan</button>'
-                : `<button class="btn btn--primary" style="width:100%;" onclick="Dashboard.openPurchaseModal('${p.tier}')">Choose ${p.name}</button>`
-              }
             </div>
           `;
         }).join('')}
       </div>
     `;
+  },
+
+  /* ── 5. COMPARE PLANS VIEW (REMOVED: REDIRECTS TO TRAINERS) ── */
+  renderPlansView() {
+    return this.renderTrainersView();
   },
 
   /* ── 6. VIEW ASSIGNED ACTIVITIES VIEW ── */
@@ -4001,10 +3984,7 @@ const Dashboard = {
               <div class="form-group">
                 <label class="form-label" for="m-goal-type">Primary Goal Type</label>
                 <select class="form-input" id="m-goal-type">
-                  <option value="Improve Fitness & Strength" selected>Improve Fitness & Strength</option>
-                  <option value="Fat Loss & Caloric Deficit">Fat Loss & Caloric Deficit</option>
-                  <option value="Hypertrophy & Muscle Gain">Hypertrophy & Muscle Gain</option>
-                  <option value="Cardiovascular Endurance">Cardiovascular Endurance</option>
+                  ${this.renderGoalTypeOptions(FitTrackData.activeGoal.goalType)}
                 </select>
               </div>
 
@@ -4444,14 +4424,20 @@ const Dashboard = {
       if (agendaElem) agendaElem.textContent = session.topic || 'Form & Training Plan Audit';
       if (isTrainer) {
         if (remoteAvatar) remoteAvatar.textContent = session.clientInitials || (session.clientName ? session.clientName.split(' ').map(n => n[0]).join('').slice(0, 2) : 'CL');
-        if (remoteName) remoteName.textContent = `Client: ${session.clientName || 'Aarav Sharma'}`;
-        if (localAvatar) localAvatar.textContent = 'RM';
-        if (localName) localName.textContent = 'You (Coach Rahul Mehta)';
+        const sessionUser = Auth.getUser();
+        const myName = sessionUser ? sessionUser.name : 'Coach';
+        const myInitials = myName.replace(/^Coach\s+/i, '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'TR';
+        if (remoteName) remoteName.textContent = `Client: ${session.clientName || 'Client'}`;
+        if (localAvatar) localAvatar.textContent = myInitials;
+        if (localName) localName.textContent = `You (${myName.startsWith('Coach') ? myName : 'Coach ' + myName})`;
       } else {
+        const sessionUser = Auth.getUser();
+        const myName = sessionUser ? sessionUser.name : (FitTrackData.currentUser?.fullName || 'Member');
+        const myInitials = myName.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'FT';
         if (remoteAvatar) remoteAvatar.textContent = session.trainerInitials || 'AM';
         if (remoteName) remoteName.textContent = session.trainerName || 'Coach Arjun Mehta';
-        if (localAvatar) localAvatar.textContent = 'IN';
-        if (localName) localName.textContent = 'You (Ishwari Nikam)';
+        if (localAvatar) localAvatar.textContent = myInitials;
+        if (localName) localName.textContent = `You (${myName})`;
       }
     }
 
@@ -5047,7 +5033,7 @@ const Dashboard = {
     const recordData = {
       id: `rec_${Date.now()}`,
       sessionId: this.videoSession.activeSessionId || 'ts_001',
-      clientName: this.currentRole === 'trainer' ? 'Aarav Sharma' : 'Ishwari Nikam',
+      clientName: this.currentRole === 'trainer' ? 'Aarav Sharma' : (Auth.getUser()?.name || FitTrackData.currentUser?.fullName || 'Member'),
       duration: durFormatted,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       size: `${sizeMb} MB`,
@@ -5556,8 +5542,9 @@ const Dashboard = {
   /* ── 1-on-1 Video Session Initialization (WebRTC + Synthetic Feeds) ── */
   async initWebRTCSession(sessionId) {
     const isTrainer = this.currentRole === 'trainer';
-    const coachName = isTrainer ? 'Coach Rahul Mehta' : (FitTrackData.trainerProfile ? FitTrackData.trainerProfile.name : 'Coach Rahul Mehta');
-    const clientName = isTrainer ? 'Aarav Sharma' : (FitTrackData.clientProfile ? FitTrackData.clientProfile.name : 'Ishwari Nikam');
+    const sessionUser = Auth.getUser();
+    const coachName = isTrainer ? (sessionUser ? sessionUser.name : 'Coach') : (FitTrackData.trainerProfile ? FitTrackData.trainerProfile.name : 'Coach Rahul Mehta');
+    const clientName = isTrainer ? 'Aarav Sharma' : (sessionUser ? sessionUser.name : (FitTrackData.clientProfile ? FitTrackData.clientProfile.name : 'Member'));
 
     // 1. Get or create Local Video Stream (Coach)
     let localStream = null;
@@ -6736,28 +6723,68 @@ const Dashboard = {
     this.renderCurrentView();
   },
 
-  handleSaveGoal() {
-    const title = document.getElementById('goal-title').value;
-    const targetWeight = parseFloat(document.getElementById('goal-target-weight').value) || 58.0;
-    const cal = parseInt(document.getElementById('goal-target-cal').value) || 2100;
-
-    FitTrackData.activeGoal.title = title;
-    FitTrackData.activeGoal.targetWeight = targetWeight;
-    FitTrackData.activeGoal.targetCalories = cal;
-
-    App.showToast('success', 'Goal Defined!', 'Your new fitness target and daily targets have been recorded.');
-    this.renderCurrentView();
+  formatGoalDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(`${iso}T00:00:00`);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   },
 
-  toggleMilestone(id) {
-    const m = FitTrackData.activeGoal.milestones.find(x => x.id === id);
-    if (m) {
-      m.completed = !m.completed;
-      const count = FitTrackData.activeGoal.milestones.filter(x => x.completed).length;
-      FitTrackData.activeGoal.progressPercentage = Math.round((count / FitTrackData.activeGoal.milestones.length) * 100);
-      App.showToast('success', m.completed ? 'Milestone Achieved! 🎉' : 'Milestone Updated', `"${m.title}" marked as ${m.completed ? 'completed' : 'pending'}.`);
-      this.renderCurrentView();
+  renderGoalTypeOptions(selected) {
+    const types = [
+      'Fat Loss & Muscle Toning',
+      'Hypertrophy & Muscle Gain',
+      'Strength & Powerlifting',
+      'Endurance & Cardiovascular',
+      'Mobility & Flexibility',
+      'Weight Loss & Muscle Definition'
+    ];
+    const unique = types.includes(selected) || !selected ? types : [selected, ...types];
+    return unique.map(type =>
+      `<option value="${type}" ${type === selected ? 'selected' : ''}>${type}</option>`
+    ).join('');
+  },
+
+  applyGoalTimeline() {
+    const goal = FitTrackData.activeGoal;
+    if (!goal || !goal.startDate || !goal.targetDate) return;
+    const start = new Date(`${goal.startDate}T00:00:00`);
+    const target = new Date(`${goal.targetDate}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(target.getTime())) return;
+    const msPerDay = 1000 * 60 * 60 * 24;
+    goal.totalDays = Math.max(1, Math.round((target - start) / msPerDay));
+    goal.daysElapsed = Math.max(0, Math.round((today - start) / msPerDay));
+  },
+
+  persistActiveGoal() {
+    if (typeof FitTrackData.saveToStorage === 'function') {
+      FitTrackData.saveToStorage();
     }
+  },
+
+  handleSaveGoal() {
+    const title = document.getElementById('goal-title').value;
+    const goalTypeEl = document.getElementById('goal-type');
+    const workoutsEl = document.getElementById('goal-workouts-week');
+    const dateEl = document.getElementById('goal-target-date');
+    const targetWeight = parseFloat(document.getElementById('goal-target-weight').value) || 58.0;
+    const cal = parseInt(document.getElementById('goal-target-cal').value) || 2100;
+    const targetDate = dateEl ? dateEl.value : FitTrackData.activeGoal.targetDate;
+
+    FitTrackData.activeGoal.title = title;
+    if (goalTypeEl) FitTrackData.activeGoal.goalType = goalTypeEl.value;
+    FitTrackData.activeGoal.targetWeight = targetWeight;
+    FitTrackData.activeGoal.targetCalories = cal;
+    if (workoutsEl) FitTrackData.activeGoal.targetWorkoutsPerWeek = parseInt(workoutsEl.value, 10) || 5;
+    FitTrackData.activeGoal.targetDate = targetDate;
+    FitTrackData.currentUser.targetWeight = targetWeight;
+    this.applyGoalTimeline();
+    this.persistActiveGoal();
+
+    App.showToast('success', 'Goal Defined!', 'Your new fitness target, deadline, and daily targets have been recorded.');
+    this.renderCurrentView();
   },
 
   filterTrainers(cat) {
@@ -6817,7 +6844,8 @@ const Dashboard = {
       type: 'workout'
     });
 
-    App.showToast('success', 'Workout Complete! 🔥🏆', `Amazing job, Ishwari! You completed today's ${FitTrackData.todaysWorkout.title} workout. Progress logged.`);
+    const memberFirst = (Auth.getUser()?.name || FitTrackData.currentUser?.name || 'Athlete').split(' ')[0];
+    App.showToast('success', 'Workout Complete! 🔥🏆', `Amazing job, ${memberFirst}! You completed today's ${FitTrackData.todaysWorkout.title} workout. Progress logged.`);
     this.renderCurrentView();
   },
 
@@ -6915,7 +6943,8 @@ const Dashboard = {
     this.renderCurrentView();
 
     setTimeout(() => {
-      let replyText = "Got your message, Ishwari! Great consistency on keeping me updated. Keep pushing on today's program!";
+      const memberFirst = (Auth.getUser()?.name || FitTrackData.currentUser?.name || 'Athlete').split(' ')[0];
+      let replyText = `Got your message, ${memberFirst}! Great consistency on keeping me updated. Keep pushing on today's program!`;
       if (userText.toLowerCase().includes('calorie') || userText.toLowerCase().includes('diet')) {
         replyText = "On rest days, keep protein at 135g and drop carbs slightly by ~30g. Stay well hydrated!";
       } else if (userText.toLowerCase().includes('squat') || userText.toLowerCase().includes('form')) {
@@ -7060,17 +7089,22 @@ const Dashboard = {
 
   handleSaveGoalModal() {
     const title = document.getElementById('m-goal-title').value;
+    const goalTypeEl = document.getElementById('m-goal-type');
     const targetWeight = parseFloat(document.getElementById('m-goal-target-weight').value) || 58.0;
     const cal = parseInt(document.getElementById('m-goal-cal').value) || 2100;
     const targetDate = document.getElementById('m-goal-target-date').value;
 
     FitTrackData.activeGoal.title = title;
+    if (goalTypeEl) FitTrackData.activeGoal.goalType = goalTypeEl.value;
     FitTrackData.activeGoal.targetWeight = targetWeight;
     FitTrackData.activeGoal.targetCalories = cal;
     FitTrackData.activeGoal.targetDate = targetDate;
+    FitTrackData.currentUser.targetWeight = targetWeight;
+    this.applyGoalTimeline();
+    this.persistActiveGoal();
 
     App.closeModal('edit-goal-modal');
-    App.showToast('success', 'Goal Updated! 🎯', `Your fitness goal "${title}" targeting ${targetWeight} kg has been updated.`);
+    App.showToast('success', 'Goal Updated! 🎯', `Your fitness goal "${title}" targeting ${targetWeight} kg by ${this.formatGoalDate(targetDate)} has been updated.`);
     this.renderCurrentView();
   },
 

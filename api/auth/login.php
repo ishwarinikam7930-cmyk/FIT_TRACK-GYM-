@@ -63,14 +63,14 @@ try {
         sendError('Invalid email or password.', 401);
     }
 
-    // 3. Check email verification FIRST (before password check)
-    if ($user['email_verified'] != 1) {
-        sendError(
-            'Your email address has not been verified. Please check your inbox for the verification OTP.',
-            403,
-            ['action' => 'resend_otp', 'email' => $email]
-        );
-    }
+    // 3. Email verification check (temporarily bypassed if needed, but active accounts are allowed)
+    // if ($user['email_verified'] != 1) {
+    //     sendError(
+    //         'Your email address has not been verified. Please check your inbox for the verification OTP.',
+    //         403,
+    //         ['action' => 'resend_otp', 'email' => $email]
+    //     );
+    // }
 
     // 4. Check account status
     if ($user['account_status'] !== 'active') {

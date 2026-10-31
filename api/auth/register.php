@@ -17,11 +17,8 @@
  */
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../config/smtp.php';
 require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/auth.php';
-require_once __DIR__ . '/../../includes/otp.php';
-require_once __DIR__ . '/../../includes/mailer.php';
 
 setApiHeaders();
 
@@ -89,15 +86,7 @@ try {
     $existing = $checkStmt->fetch();
 
     if ($existing) {
-        if ($existing['email_verified'] == 1) {
-            sendError('An account with this email already exists. Please sign in.', 409);
-        } else {
-            // Unverified duplicate – allow OTP resend
-            sendError('An unverified account with this email exists. Please check your email for the verification OTP.', 409, [
-                'action' => 'resend_otp',
-                'email'  => $email
-            ]);
-        }
+        sendError('An account with this email already exists. Please sign in.', 409);
     }
 
     $passwordHash = hashPassword($password);
@@ -114,10 +103,10 @@ try {
 
     $pdo->beginTransaction();
 
-    // Insert user (email_verified = 0, account_status = pending)
+    // Insert user directly as active and email_verified = 1 (OTP temporarily bypassed)
     $insertUser = $pdo->prepare("
-        INSERT INTO users (full_name, email, password_hash, role, phone, account_status, email_verified, created_at, updated_at)
-        VALUES (:full_name, :email, :password_hash, :role, :phone, 'pending', 0, NOW(), NOW())
+        INSERT INTO users (full_name, email, password_hash, role, phone, account_status, email_verified, email_verified_at, created_at, updated_at)
+        VALUES (:full_name, :email, :password_hash, :role, :phone, 'active', 1, NOW(), NOW(), NOW())
     ");
     $insertUser->execute([
         ':full_name'     => $fullName,
@@ -128,11 +117,11 @@ try {
     ]);
     $userId = (int) $pdo->lastInsertId();
 
-    // Insert role profile (empty, populated after verification)
+    // Insert role profile
     if ($role === 'trainer') {
         $pdo->prepare("
             INSERT INTO trainer_profiles (trainer_id, specialization, bio, profile_status, created_at, updated_at)
-            VALUES (:uid, :spec, 'Certified Fitness Coach on FitTrack platform.', 'pending', NOW(), NOW())
+            VALUES (:uid, :spec, 'Certified Fitness Coach on FitTrack platform.', 'active', NOW(), NOW())
         ")->execute([':uid' => $userId, ':spec' => $roleExtra ?: 'Strength & Conditioning']);
     } else {
         $pdo->prepare("
@@ -141,43 +130,14 @@ try {
         ")->execute([':uid' => $userId, ':goal' => $mappedGoal]);
     }
 
-    // Generate & store OTP
-    $otp     = generateOtp();
-    $otpHash = hashOtp($otp);
-    $expiry  = date('Y-m-d H:i:s', time() + (OTP_EXPIRY_MINUTES * 60));
-    $now     = date('Y-m-d H:i:s');
-
-    $pdo->prepare("
-        UPDATE users
-        SET verification_otp_hash = :hash,
-            otp_expiry             = :expiry,
-            otp_attempts           = 0,
-            otp_last_sent          = :now,
-            updated_at             = NOW()
-        WHERE user_id = :uid
-    ")->execute([
-        ':hash'   => $otpHash,
-        ':expiry' => $expiry,
-        ':now'    => $now,
-        ':uid'    => $userId
-    ]);
-
     $pdo->commit();
 
-    // Send OTP email
-    $sent = sendVerificationOTP($email, $fullName, $otp);
-
-    if (!$sent) {
-        // Don't fail registration; user can resend OTP
-        error_log("OTP email failed for new user: $email");
-    }
-
+    // Account is created and active, but user is NOT automatically logged in (must sign in first)
     sendSuccess([
-        'email'            => $email,
-        'otp_sent'         => $sent,
-        'cooldown'         => OTP_RESEND_COOLDOWN,
-        'expiry_minutes'   => OTP_EXPIRY_MINUTES,
-    ], 'Account created! A verification OTP has been sent to your email.', 201);
+        'email' => $email,
+        'role'  => $role,
+        'name'  => $fullName
+    ], 'Account created successfully! Please sign in with your email and password.', 201);
 
 } catch (PDOException $e) {
     if (isset($pdo) && $pdo->inTransaction()) {

@@ -272,9 +272,9 @@ const LoginApp = (() => {
                 </div>
               </div>
 
-              <!-- ── 4. FORGOT PASSWORD FORM ── -->
+              <!-- ── 4. FORGOT / RESET PASSWORD FORM (NO OTP) ── -->
               <form class="login-form" id="forgot-form" novalidate style="display:none;">
-                <p class="otp-instruction">Enter your registered email address. We'll send you a reset OTP.</p>
+                <p class="otp-instruction">Enter your registered email address and set a new password.</p>
 
                 <div class="login-field" id="field-forgot-email">
                   <label for="forgot-email">Email Address <span class="required">*</span></label>
@@ -285,9 +285,29 @@ const LoginApp = (() => {
                   <span class="field-error" id="forgot-email-error">Please enter a valid email address</span>
                 </div>
 
+                <div class="login-field" id="field-forgot-password">
+                  <label for="forgot-password">New Password <span class="required">*</span></label>
+                  <div class="login-input-wrapper">
+                    <span class="login-input-icon">${Icons.lock}</span>
+                    <input type="password" id="forgot-password" class="login-input" placeholder="Min 8 chars, A-Z, a-z, 0-9" required autocomplete="new-password"/>
+                    <button type="button" class="login-password-toggle" id="forgot-password-toggle" aria-label="Toggle password visibility">${Icons.eye}</button>
+                  </div>
+                  <span class="field-error" id="forgot-password-error">Min 8 chars with uppercase, lowercase, and number</span>
+                </div>
+
+                <div class="login-field" id="field-forgot-confirm-password">
+                  <label for="forgot-confirm-password">Confirm New Password <span class="required">*</span></label>
+                  <div class="login-input-wrapper">
+                    <span class="login-input-icon">${Icons.lock}</span>
+                    <input type="password" id="forgot-confirm-password" class="login-input" placeholder="Re-enter new password" required autocomplete="new-password"/>
+                    <button type="button" class="login-password-toggle" id="forgot-confirm-toggle" aria-label="Toggle confirm password visibility">${Icons.eye}</button>
+                  </div>
+                  <span class="field-error" id="forgot-confirm-error">Passwords must match</span>
+                </div>
+
                 <button type="submit" class="login-submit-btn" id="forgot-submit-btn">
-                  <span class="btn-text">Send Reset OTP</span>
-                  ${Icons.key}
+                  <span class="btn-text">Reset Password</span>
+                  ${Icons.checkCircle}
                   <span class="login-spinner"></span>
                 </button>
 
@@ -296,62 +316,8 @@ const LoginApp = (() => {
                 </div>
               </form>
 
-              <!-- ── 5. RESET PASSWORD FORM ── -->
-              <form class="login-form" id="reset-form" novalidate style="display:none;">
-                <div class="otp-email-badge" id="reset-email-badge">
-                  ${Icons.mail}
-                  <span id="reset-email-display">your@email.com</span>
-                </div>
-
-                <div class="login-field">
-                  <label>Reset OTP <span class="required">*</span></label>
-                  <div class="otp-input-group" id="reset-otp-group">
-                    <input type="text" class="otp-digit" id="reset-otp-0" maxlength="1" pattern="\d" inputmode="numeric" autocomplete="one-time-code" aria-label="OTP digit 1"/>
-                    <input type="text" class="otp-digit" id="reset-otp-1" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 2"/>
-                    <input type="text" class="otp-digit" id="reset-otp-2" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 3"/>
-                    <input type="text" class="otp-digit" id="reset-otp-3" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 4"/>
-                    <input type="text" class="otp-digit" id="reset-otp-4" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 5"/>
-                    <input type="text" class="otp-digit" id="reset-otp-5" maxlength="1" pattern="\d" inputmode="numeric" aria-label="OTP digit 6"/>
-                  </div>
-                </div>
-
-                <div class="login-field" id="field-reset-password">
-                  <label for="reset-password">New Password <span class="required">*</span></label>
-                  <div class="login-input-wrapper">
-                    <span class="login-input-icon">${Icons.lock}</span>
-                    <input type="password" id="reset-password" class="login-input" placeholder="Min 8 chars, A-Z, a-z, 0-9" required autocomplete="new-password"/>
-                    <button type="button" class="login-password-toggle" id="reset-password-toggle" aria-label="Toggle password visibility">${Icons.eye}</button>
-                  </div>
-                  <span class="field-error" id="reset-password-error">Min 8 chars with uppercase, lowercase, and number</span>
-                </div>
-
-                <div class="login-field" id="field-reset-confirm-password">
-                  <label for="reset-confirm-password">Confirm New Password <span class="required">*</span></label>
-                  <div class="login-input-wrapper">
-                    <span class="login-input-icon">${Icons.lock}</span>
-                    <input type="password" id="reset-confirm-password" class="login-input" placeholder="Re-enter new password" required autocomplete="new-password"/>
-                    <button type="button" class="login-password-toggle" id="reset-confirm-toggle" aria-label="Toggle confirm password visibility">${Icons.eye}</button>
-                  </div>
-                  <span class="field-error" id="reset-confirm-error">Passwords must match</span>
-                </div>
-
-                <button type="submit" class="login-submit-btn" id="reset-submit-btn">
-                  <span class="btn-text">Reset Password</span>
-                  ${Icons.checkCircle}
-                  <span class="login-spinner"></span>
-                </button>
-
-                <div class="otp-resend-row">
-                  <button type="button" class="otp-resend-btn" id="reset-resend-btn" disabled>
-                    ${Icons.refresh} Resend OTP
-                  </button>
-                  <span class="otp-countdown" id="reset-countdown"></span>
-                </div>
-
-                <div class="login-switch-prompt">
-                  <button type="button" class="login-switch-link" id="reset-back-btn">${Icons.arrowLeft} Back to Sign In</button>
-                </div>
-              </form>
+              <!-- ── 5. RESET PASSWORD FORM (Placeholder for backwards compatibility) ── -->
+              <form class="login-form" id="reset-form" novalidate style="display:none;"></form>
 
               <!-- Demo Section (only on login) -->
               <div class="login-demo-section" id="login-demo-section">
@@ -415,11 +381,13 @@ const LoginApp = (() => {
     on('reset-form',    'submit', handleResetSubmit);
 
     // Password toggles
-    on('login-password-toggle',   'click', () => togglePwd('login',  'login-password'));
-    on('reg-password-toggle',     'click', () => togglePwd('reg',    'reg-password'));
-    on('reg-confirm-toggle',      'click', () => togglePwd('reg2',   'reg-confirm-password'));
-    on('reset-password-toggle',   'click', () => togglePwd('reset',  'reset-password'));
-    on('reset-confirm-toggle',    'click', () => togglePwd('reset2', 'reset-confirm-password'));
+    on('login-password-toggle',   'click', () => togglePwd('login',    'login-password'));
+    on('reg-password-toggle',     'click', () => togglePwd('reg',      'reg-password'));
+    on('reg-confirm-toggle',      'click', () => togglePwd('reg2',     'reg-confirm-password'));
+    on('forgot-password-toggle',  'click', () => togglePwd('forgot_p', 'forgot-password'));
+    on('forgot-confirm-toggle',   'click', () => togglePwd('forgot_c', 'forgot-confirm-password'));
+    on('reset-password-toggle',   'click', () => togglePwd('reset',    'reset-password'));
+    on('reset-confirm-toggle',    'click', () => togglePwd('reset2',   'reset-confirm-password'));
 
     // Forgot password link
     on('login-forgot', 'click', (e) => { e.preventDefault(); switchMode('forgot'); });
@@ -433,10 +401,10 @@ const LoginApp = (() => {
     // Clear field errors on input
     ['login-email',    'login-password',
      'reg-name',       'reg-email',       'reg-phone', 'reg-password', 'reg-confirm-password',
-     'forgot-email',   'reset-password',  'reset-confirm-password'
+     'forgot-email',   'forgot-password', 'forgot-confirm-password'
     ].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.addEventListener('input', () => clearFieldError(id.replace('login-', '').replace('reg-', 'reg-').replace('forgot-', 'forgot-').replace('reset-', 'reset-')));
+      if (el) el.addEventListener('input', () => clearFieldError(id));
     });
 
     // Password strength meter
@@ -507,7 +475,7 @@ const LoginApp = (() => {
       login:    { user: ['Welcome back', 'Sign in to your member account'],          trainer: ['Coach Portal', 'Access your professional coaching dashboard'] },
       register: { user: ['Join FitTrack', 'Create your member account in seconds'],  trainer: ['Coach Registration', 'Create your professional trainer profile'] },
       otp:      { user: ['Check Your Email', 'Enter the 6-digit verification code'], trainer: ['Check Your Email', 'Enter the 6-digit verification code'] },
-      forgot:   { user: ['Forgot Password?', 'We\'ll send you a reset OTP'],          trainer: ['Forgot Password?', 'We\'ll send you a reset OTP'] },
+      forgot:   { user: ['Reset Password', 'Enter your email and new password'], trainer: ['Reset Password', 'Enter your email and new password'] },
       reset:    { user: ['Reset Password', 'Enter the OTP and choose a new password'], trainer: ['Reset Password', 'Enter the OTP and choose a new password'] },
     };
 
@@ -672,20 +640,21 @@ const LoginApp = (() => {
       btn.classList.remove('loading');
 
       if (res.success) {
-        pendingEmail = email;
-        showAlert('success', `Account created! We've sent a verification code to ${email}`);
+        document.getElementById('register-form')?.reset();
+        showAlert('success', '🎉 Account created successfully! Please sign in with your email and password.');
+
         setTimeout(() => {
-          showOtpScreen(email, 'verify', res.data?.cooldown || 60);
-        }, 800);
+          switchMode('login');
+          const loginEmail = document.getElementById('login-email');
+          if (loginEmail) loginEmail.value = email;
+          const loginPwd = document.getElementById('login-password');
+          if (loginPwd) {
+            loginPwd.value = '';
+            loginPwd.focus();
+          }
+        }, 1200);
       } else {
-        // If email already exists and unverified, go directly to OTP
-        if (res.data?.action === 'resend_otp') {
-          pendingEmail = email;
-          showAlert('success', 'Unverified account found. A new OTP has been sent.');
-          setTimeout(() => showOtpScreen(email, 'verify', 60), 800);
-        } else {
-          showAlert('error', res.message || 'Registration failed.');
-        }
+        showAlert('error', res.message || 'Registration failed.');
       }
     } catch (err) {
       btn.classList.remove('loading');
@@ -736,25 +705,55 @@ const LoginApp = (() => {
 
   async function handleForgotSubmit(e) {
     e.preventDefault();
-    const email = val('forgot-email').toLowerCase();
+    const email   = val('forgot-email').toLowerCase();
+    const newPwd  = val('forgot-password');
+    const confirm = val('forgot-confirm-password');
 
+    let valid = true;
     if (!email || !isEmail(email)) {
       showFieldError('forgot-email', 'Enter a valid email address');
-      return;
+      valid = false;
     }
+    if (!validatePassword(newPwd)) {
+      showFieldError('forgot-password', 'Min 8 chars with uppercase, lowercase, and number');
+      valid = false;
+    }
+    if (newPwd !== confirm) {
+      showFieldError('forgot-confirm-password', 'Passwords do not match');
+      valid = false;
+    }
+
+    if (!valid) return;
 
     const btn = document.getElementById('forgot-submit-btn');
     btn.classList.add('loading');
     hideAlerts();
 
     try {
-      const res = await apiFetch('api/auth/forgot-password.php', { email });
+      const res = await apiFetch('api/auth/reset-password.php', {
+        email,
+        new_password:     newPwd,
+        confirm_password: confirm
+      });
       btn.classList.remove('loading');
 
-      // Always show success (server protects against enumeration)
-      showAlert('success', res.message || 'If an account exists, a reset OTP has been sent.');
-      pendingEmail = email;
-      setTimeout(() => showResetScreen(email, res.data?.cooldown || 60), 1200);
+      if (res.success) {
+        document.getElementById('forgot-form')?.reset();
+        showAlert('success', '🎉 Password reset successfully! Please sign in with your new password.');
+        setTimeout(() => {
+          switchMode('login');
+          const loginEmail = document.getElementById('login-email');
+          if (loginEmail) loginEmail.value = email;
+          const loginPwd = document.getElementById('login-password');
+          if (loginPwd) {
+            loginPwd.value = '';
+            loginPwd.focus();
+          }
+        }, 1500);
+      } else {
+        shakeCard();
+        showAlert('error', res.message || 'Failed to reset password.');
+      }
     } catch (err) {
       btn.classList.remove('loading');
       showAlert('error', 'Network error. Please ensure XAMPP is running.');
@@ -833,14 +832,8 @@ const LoginApp = (() => {
         if (btn) btn.classList.remove('loading');
         shakeCard();
 
-        // If unverified email, offer to go to OTP
-        if (res.data?.action === 'resend_otp') {
-          showAlert('error', res.message + ' Click here to verify.');
-          pendingEmail = email;
-          setTimeout(() => showOtpScreen(email, 'verify', 60), 1500);
-        } else {
-          showAlert('error', res.message || 'Invalid email or password.');
-        }
+        // Invalid credentials or inactive account
+        showAlert('error', res.message || 'Invalid email or password.');
       }
     } catch (err) {
       if (btn) btn.classList.remove('loading');

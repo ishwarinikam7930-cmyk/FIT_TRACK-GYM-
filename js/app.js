@@ -104,6 +104,10 @@ const App = {
     }
 
     try {
+      // Sync mock/local data with authenticated session user
+      if (typeof FitTrackData !== 'undefined' && FitTrackData.syncWithSessionUser) {
+        FitTrackData.syncWithSessionUser();
+      }
       // Initialize dashboard role based on URL/page/session
       Dashboard.initRole();
     } catch (e) {
@@ -150,18 +154,29 @@ const App = {
     }
   },
 
+  /* ── Responsive Time Greeting ── */
+  getTimeGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Good morning';
+    if (hour >= 12 && hour < 17) return 'Good afternoon';
+    if (hour >= 17 && hour < 22) return 'Good evening';
+    return 'Welcome';
+  },
+
   /* ── Top Navigation Bar ── */
   renderTopbar() {
     const topbar = document.getElementById('topbar');
     if (!topbar) return;
 
     const isTrainer = Dashboard.currentRole === 'trainer';
+    const sessionUser = Auth.getUser();
+    const timeGreeting = this.getTimeGreeting();
 
     if (isTrainer) {
-      const trainer = (typeof FitTrackData !== 'undefined' && FitTrackData.trainerProfile) || (typeof FitTrackData !== 'undefined' && FitTrackData.activeTrainer) || {
-        name: 'Coach Rahul Mehta',
-        avatarInitials: 'RM'
-      };
+      const trainer = (typeof FitTrackData !== 'undefined' && FitTrackData.trainerProfile) || {};
+      const trainerFullName = (sessionUser && sessionUser.name) ? sessionUser.name : (trainer.fullName || 'Coach');
+      const trainerFirstName = trainerFullName.replace(/^Coach\s+/i, '').split(' ')[0] || 'Coach';
+      const initials = trainerFullName.replace(/^Coach\s+/i, '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'TR';
       const unreadNotifs = typeof FitTrackData !== 'undefined' && FitTrackData.getTrainerUnreadNotificationsCount ? FitTrackData.getTrainerUnreadNotificationsCount() : 0;
       const unreadMsgs = typeof FitTrackData !== 'undefined' && FitTrackData.getTrainerUnreadMessagesCount ? FitTrackData.getTrainerUnreadMessagesCount() : 0;
 
@@ -172,7 +187,7 @@ const App = {
           </button>
           <div>
             <h1 class="topbar__title" onclick="Dashboard.navigate('trainer_dashboard')" style="cursor:pointer;">FitTrack Trainer Portal</h1>
-            <span class="topbar__welcome">Welcome back, <strong>Rahul</strong>! · <span style="color:var(--color-emerald-600);font-weight:700;">Verified Master Coach</span></span>
+            <span class="topbar__welcome">${timeGreeting}, <strong>${trainerFirstName}</strong>! · <span style="color:var(--color-emerald-600);font-weight:700;">Verified Master Coach</span></span>
           </div>
         </div>
 
@@ -204,10 +219,10 @@ const App = {
           <div class="topbar__profile" id="topbar-profile" tabindex="0" aria-label="Trainer menu" aria-haspopup="true" aria-expanded="false">
             <div class="avatar avatar--sm avatar--placeholder" 
                  style="display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:800;width:36px;height:36px;border-radius:var(--radius-full);background:linear-gradient(135deg, #059669, #047857);color:#fff;box-shadow:var(--shadow-sm);">
-              ${trainer.avatarInitials || 'RM'}
+              ${initials}
             </div>
             <div class="topbar__profile-info">
-              <span class="topbar__profile-name">Coach Rahul Mehta</span>
+              <span class="topbar__profile-name">${trainerFullName.startsWith('Coach') ? trainerFullName : 'Coach ' + trainerFullName}</span>
               <span class="topbar__profile-role" style="color:var(--color-emerald-600);font-weight:700;">Master Coach</span>
             </div>
             <span class="topbar__profile-chevron" aria-hidden="true">${Icons.chevronDown}</span>
@@ -238,12 +253,10 @@ const App = {
         </div>
       `;
     } else {
-      const user = (typeof FitTrackData !== 'undefined' && FitTrackData.currentUser) || {
-        name: 'Ishwari Nikam',
-        fullName: 'Ishwari Nikam',
-        avatarInitials: 'IN'
-      };
-      const sessionUser = Auth.getUser();
+      const user = (typeof FitTrackData !== 'undefined' && FitTrackData.currentUser) || {};
+      const userFullName = (sessionUser && sessionUser.name) ? sessionUser.name : (user.fullName || user.name || 'Member');
+      const userFirstName = userFullName.split(' ')[0] || 'Member';
+      const initials = userFullName.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'FT';
       const unreadNotifs = typeof FitTrackData !== 'undefined' && FitTrackData.getUserUnreadNotificationsCount ? FitTrackData.getUserUnreadNotificationsCount() : 0;
       const unreadMsgs = typeof FitTrackData !== 'undefined' && FitTrackData.getUserUnreadMessagesCount ? FitTrackData.getUserUnreadMessagesCount() : 0;
 
@@ -254,7 +267,7 @@ const App = {
           </button>
           <div>
             <h1 class="topbar__title" onclick="Dashboard.navigate('dashboard')" style="cursor:pointer;">FitTrack Platform</h1>
-            <span class="topbar__welcome">Welcome back, <strong>${sessionUser ? sessionUser.name.split(' ')[0] : user.name}</strong>! · <span style="color:var(--color-primary);font-weight:700;">Pro Plan Active</span></span>
+            <span class="topbar__welcome">${timeGreeting}, <strong>${userFirstName}</strong>! · <span style="color:var(--color-primary);font-weight:700;">Pro Plan Active</span></span>
           </div>
         </div>
 
@@ -286,10 +299,10 @@ const App = {
           <div class="topbar__profile" id="topbar-profile" tabindex="0" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
             <div class="avatar avatar--sm avatar--placeholder" 
                  style="display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:800;width:36px;height:36px;border-radius:var(--radius-full);background:linear-gradient(135deg, #10B981, #059669);color:#fff;box-shadow:var(--shadow-sm);">
-              ${user.avatarInitials}
+              ${initials}
             </div>
             <div class="topbar__profile-info">
-              <span class="topbar__profile-name">${sessionUser ? sessionUser.name : user.fullName}</span>
+              <span class="topbar__profile-name">${userFullName}</span>
               <span class="topbar__profile-role">Pro Member</span>
             </div>
             <span class="topbar__profile-chevron" aria-hidden="true">${Icons.chevronDown}</span>

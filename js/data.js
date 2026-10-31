@@ -15,15 +15,15 @@ const FitTrackData = {
   /* ── 1. Current User Profile ── */
   currentUser: {
     id: 'user_001',
-    name: 'Ishwari',
-    fullName: 'Ishwari Nikam',
-    email: 'ishwari.nikam@email.com',
+    name: 'Member',
+    fullName: 'FitTrack Member',
+    email: 'member@fittrack.com',
     phone: '+91 98765 43210',
     age: 24,
     gender: 'Female',
     city: 'Mumbai, India',
     role: 'user',
-    avatarInitials: 'IN',
+    avatarInitials: 'FT',
     subscription: 'pro',
     joinedDate: '2026-08-15',
     
@@ -99,10 +99,56 @@ const FitTrackData = {
       activeClients: 34,
       avatarInitials: 'AM',
       avatarBg: '#059669',
-      rate: '$45 / session',
       isAssigned: true,
       bio: 'Former national athlete specializing in progressive hypertrophy, body recomposition, and functional strength.',
-      tags: ['Strength', 'Hypertrophy', 'Form Check', 'Powerlifting']
+      tags: ['Strength', 'Hypertrophy', 'Form Check', 'Powerlifting'],
+      programmes: [
+        {
+          id: 'prog_am_1m',
+          trainerId: 'trainer_001',
+          trainerName: 'Coach Arjun Mehta',
+          title: '1-Month Strength & Hypertrophy Foundation',
+          category: 'Strength & Conditioning',
+          duration: '1 Month',
+          durationMonths: 1,
+          price: 1999,
+          workoutFeatures: '4-Day Split (Push/Pull/Legs/Upper), Exercise Video Form Analysis',
+          dietGuidance: 'High-Protein Macro Breakdown & Nutrition Guidance',
+          personalization: 'Weekly Volume & Load Adjustments',
+          benefits: ['Direct Trainer Messaging', 'Personalized Workout Plan', 'Custom Diet Targets'],
+          description: 'A 1-month structured hypertrophy foundation programme designed to build lean muscle mass with progressive overload.'
+        },
+        {
+          id: 'prog_am_3m',
+          trainerId: 'trainer_001',
+          trainerName: 'Coach Arjun Mehta',
+          title: '3-Month Complete Athletic Transformation',
+          category: 'Strength & Conditioning',
+          duration: '3 Months',
+          durationMonths: 3,
+          price: 4999,
+          workoutFeatures: '5-Day Periodized Hypertrophy & Kinetic Power Split',
+          dietGuidance: 'Full Macro Cycling & Meal Plan with Bi-weekly Adjustments',
+          personalization: 'Bi-weekly Strength & Body Composition Audits',
+          benefits: ['Priority Chat Support', 'Video Form Corrections', 'Full Nutrition Blueprint', 'Milestone Assessments'],
+          description: 'Comprehensive 12-week athletic transformation focusing on heavy compound movements, mobility, and metabolic conditioning.'
+        },
+        {
+          id: 'prog_am_6m',
+          trainerId: 'trainer_001',
+          trainerName: 'Coach Arjun Mehta',
+          title: '6-Month Elite Body Recomposition Masterclass',
+          category: 'Strength & Conditioning',
+          duration: '6 Months',
+          durationMonths: 6,
+          price: 8999,
+          workoutFeatures: '3-Phase Periodization: Base, Peak Strength, Cut & Define',
+          dietGuidance: 'Custom Competition-Grade Diet Revisions & Supplement Guide',
+          personalization: 'Monthly Biometrics Review & Continuous Progression Mapping',
+          benefits: ['Unlimited Messaging Access', 'Personalized Routine & Diet', 'Plateau-Busting Strategies', 'Progress Logs Audit'],
+          description: 'A 6-month transformational journey for serious lifters seeking significant muscle gain, fat loss, and strength PRs.'
+        }
+      ]
     },
     {
       id: 'trainer_002',
@@ -116,10 +162,41 @@ const FitTrackData = {
       activeClients: 28,
       avatarInitials: 'PS',
       avatarBg: '#7C3AED',
-      rate: '$40 / session',
       isAssigned: false,
       bio: 'Physiotherapist & 500-hour RYT yoga instructor focusing on core alignment, flexibility, breathing, and joint rehabilitation.',
-      tags: ['Yoga', 'Flexibility', 'Posture', 'Rehab']
+      tags: ['Yoga', 'Flexibility', 'Posture', 'Rehab'],
+      programmes: [
+        {
+          id: 'prog_ps_1m',
+          trainerId: 'trainer_002',
+          trainerName: 'Dr. Priya Sharma',
+          title: '1-Month Posture & Spine Decompression Reset',
+          category: 'Yoga & Mobility',
+          duration: '1 Month',
+          durationMonths: 1,
+          price: 1799,
+          workoutFeatures: 'Daily 25-Min Restorative Yoga & Spine Mobility Routines',
+          dietGuidance: 'Anti-Inflammatory Hydration & Clean Eating Guide',
+          personalization: 'Ergonomic Desk Posture Audit',
+          benefits: ['Daily Guided Video Sequences', 'Direct Posture Feedback', 'Stress & Breathwork Modules'],
+          description: 'Designed for desk workers and individuals suffering from lower back stiffness and rounded shoulders.'
+        },
+        {
+          id: 'prog_ps_3m',
+          trainerId: 'trainer_002',
+          trainerName: 'Dr. Priya Sharma',
+          title: '3-Month Deep Mobility & Functional Flexibility',
+          category: 'Yoga & Mobility',
+          duration: '3 Months',
+          durationMonths: 3,
+          price: 4499,
+          workoutFeatures: 'Hatha-Vinyasa Flow, Hip Openers, Hamstring Lengthening',
+          dietGuidance: 'Gut Health & Micronutrient Optimization Plan',
+          personalization: 'Functional Movement Screen (FMS) Progress Check',
+          benefits: ['Full Mobility Routines', 'Joint Pain Relief Protocols', 'Monthly Flexibility Testing'],
+          description: 'Unlock full joint range of motion, deep core stability, and athletic mobility across a 3-month curriculum.'
+        }
+      ]
     },
     {
       id: 'trainer_003',
@@ -133,10 +210,41 @@ const FitTrackData = {
       activeClients: 42,
       avatarInitials: 'MV',
       avatarBg: '#EA580C',
-      rate: '$50 / session',
       isAssigned: false,
       bio: 'High-intensity athletic conditioning expert, kettlebell master, and metabolic conditioning coach for rapid fat loss.',
-      tags: ['HIIT', 'Fat Loss', 'Kettlebell', 'Cardio']
+      tags: ['HIIT', 'Fat Loss', 'Kettlebell', 'Cardio'],
+      programmes: [
+        {
+          id: 'prog_mv_1m',
+          trainerId: 'trainer_003',
+          trainerName: 'Marcus Vance',
+          title: '1-Month Kettlebell & High-Intensity Fat Shred',
+          category: 'HIIT & Fat Loss',
+          duration: '1 Month',
+          durationMonths: 1,
+          price: 2199,
+          workoutFeatures: 'Tabata & EMOM High-Density Circuits (35 Mins)',
+          dietGuidance: 'Calorie Deficit Calculator & Quick Prep Meal Guide',
+          personalization: 'Weekly Heart-Rate & Cardio Capacity Tracking',
+          benefits: ['Explosive Fat Burning Plans', 'Equipment-Free Alternatives', 'Trainer Chat Support'],
+          description: 'Accelerate fat burning and functional conditioning with scientifically programmed high-intensity intervals.'
+        },
+        {
+          id: 'prog_mv_3m',
+          trainerId: 'trainer_003',
+          trainerName: 'Marcus Vance',
+          title: '3-Month Extreme Metabolic Reconditioning',
+          category: 'HIIT & Fat Loss',
+          duration: '3 Months',
+          durationMonths: 3,
+          price: 5499,
+          workoutFeatures: 'Progressive Athletic Conditioning, Plyometrics & Core Power',
+          dietGuidance: 'Carb-Cycling Blueprint for Lean Definition',
+          personalization: 'Bi-Weekly Body Composition & VO2 Max Assessments',
+          benefits: ['Advanced Metabolic Protocols', 'Full Meal Plans', 'Fat Loss Habit Coaching'],
+          description: '12-week comprehensive metabolic acceleration to shed body fat while preserving lean muscle tissue.'
+        }
+      ]
     },
     {
       id: 'trainer_004',
@@ -150,28 +258,67 @@ const FitTrackData = {
       activeClients: 38,
       avatarInitials: 'ER',
       avatarBg: '#0284C7',
-      rate: '$55 / session',
       isAssigned: false,
       bio: 'Certified sports dietitian (CISSN) and body sculpting coach providing precision macro planning and contest preparation.',
-      tags: ['Diet Plans', 'Macro Counting', 'Toning', 'Muscle Gain']
+      tags: ['Diet Plans', 'Macro Counting', 'Toning', 'Muscle Gain'],
+      programmes: [
+        {
+          id: 'prog_er_1m',
+          trainerId: 'trainer_004',
+          trainerName: 'Elena Rostova',
+          title: '1-Month Precision Nutrition & Body Tone Kickstart',
+          category: 'Nutrition & Toning',
+          duration: '1 Month',
+          durationMonths: 1,
+          price: 2499,
+          workoutFeatures: 'Full-Body Resistance Band & Dumbbell Toning Splits',
+          dietGuidance: 'Meal-by-Meal Calorie & Macro Prescriptions with Grocery Lists',
+          personalization: 'Weekly Food Diary Audits & Craving Management',
+          benefits: ['Customized Daily Meal Plans', 'Dietary Substitution Lists', 'Direct Dietitian Messaging'],
+          description: 'Eliminate nutrition guesswork with bespoke meal plans designed for lean muscular definition and steady fat loss.'
+        },
+        {
+          id: 'prog_er_3m',
+          trainerId: 'trainer_004',
+          trainerName: 'Elena Rostova',
+          title: '3-Month Complete Body Recomposition & Metabolism Reset',
+          category: 'Nutrition & Toning',
+          duration: '3 Months',
+          durationMonths: 3,
+          price: 5999,
+          workoutFeatures: 'Progressive Hypertrophy & Silhouette Sculpting Routine',
+          dietGuidance: 'Metabolic Adaptation & Reverse Dieting Protocols',
+          personalization: 'Bi-Weekly Macro Revisions Based on Body Fat Metrics',
+          benefits: ['Full Meal-by-Meal Plan', 'Supplement Guidelines', 'Priority WhatsApp/Chat Support'],
+          description: 'Transform your body composition sustainably with tailored nutrition periodization and targeted strength training.'
+        }
+      ]
     }
   ],
 
-  /* ── 4. Plans Comparison ── */
+  /* ── 4. Active Programme (User Selected Trainer Programme) ── */
   activePlan: {
-    name: 'Pro Coaching',
-    tier: 'pro',
-    billingCycle: 'Monthly',
-    price: '$59',
-    duration: 30,
+    programmeId: 'prog_am_3m',
+    name: '3-Month Complete Athletic Transformation',
+    trainerName: 'Coach Arjun Mehta',
+    trainerId: 'trainer_001',
+    trainerSpecialization: 'Strength & Conditioning',
+    category: 'Strength & Conditioning',
+    duration: '3 Months',
+    durationMonths: 3,
+    price: 4999,
+    formattedPrice: '₹4,999',
+    paymentStatus: 'Paid',
+    status: 'Active',
     startDate: '2026-09-01',
-    endDate: '2026-09-30',
-    daysRemaining: 14,
+    endDate: '2026-11-30',
+    daysRemaining: 31,
     workoutCompletion: 75,
-    totalWorkouts: 20,
-    completedWorkouts: 15,
-    upcomingSessions: 2,
-    status: 'Active'
+    totalWorkouts: 48,
+    completedWorkouts: 36,
+    workoutFeatures: '5-Day Periodized Hypertrophy & Kinetic Power Split',
+    dietGuidance: 'Full Macro Cycling & Meal Plan with Bi-weekly Adjustments',
+    description: 'Comprehensive 12-week athletic transformation focusing on heavy compound movements, mobility, and metabolic conditioning.'
   },
 
   plansList: [
@@ -544,12 +691,12 @@ const FitTrackData = {
   /* ── 1. Trainer Profile & Qualifications ── */
   trainerProfile: {
     id: 'trainer_001',
-    name: 'Rahul Mehta',
-    fullName: 'Rahul Mehta',
-    email: 'rahul.mehta@fittrack.com',
+    name: 'Coach',
+    fullName: 'FitTrack Coach',
+    email: 'coach@fittrack.com',
     phone: '+91 98111 22334',
     city: 'Mumbai, India',
-    avatarInitials: 'RM',
+    avatarInitials: 'TC',
     title: 'Senior Fitness & Performance Coach',
     experienceYears: 8,
     ratePerHour: 45,
@@ -595,109 +742,79 @@ const FitTrackData = {
     ]
   },
 
-  /* ── 3. Trainer Published Coaching Plans (Direct Self-Service Publishing) ── */
+  /* ── 3. Trainer Published Duration-Based Programmes ── */
   trainerPublishedPlans: [
     {
       id: 'tp_001',
-      title: '30-Day Hypertrophy & Fat Loss Blueprint',
-      tier: 'Pro Coaching',
-      price: '$59 / month',
-      duration: '4 Weeks (30 Days)',
+      title: '1-Month Strength & Hypertrophy Foundation',
+      category: 'Strength & Conditioning',
+      price: 1999,
+      formattedPrice: '₹1,999',
+      duration: '1 Month',
+      durationMonths: 1,
       enrolledCount: 14,
       status: 'Published',
       publishedDate: 'Sep 01, 2026',
       rating: 4.95,
-      workoutFeatures: '5-Day Push/Pull/Legs Split, Form Checks, Progressive Overload',
-      dietGuidance: 'Custom Macro Breakdown (High Protein) with Weekly Adjustments',
-      consultationFreq: '2 Live Video Calls / Month',
-      progressTracking: 'Weekly Weigh-in & In-Body Metrics Audit',
-      oneToOneSessions: '2 Sessions (60 min each)',
-      description: 'Structured 5-day periodization focusing on lean muscle synthesis, metabolic deficit, and posture reinforcement.'
+      workoutFeatures: '4-Day Split (Push/Pull/Legs/Upper), Exercise Video Form Analysis',
+      dietGuidance: 'High-Protein Macro Breakdown & Nutrition Guidance',
+      personalization: 'Weekly Volume & Load Adjustments',
+      benefits: ['Direct Trainer Messaging', 'Personalized Workout Plan', 'Custom Diet Targets'],
+      description: 'A 1-month structured hypertrophy foundation programme designed to build lean muscle mass with progressive overload.'
     },
     {
       id: 'tp_002',
-      title: '12-Week Athletic Power & Core Sculpt',
-      tier: 'Elite Coaching',
-      price: '$99 / month',
-      duration: '12 Weeks (90 Days)',
+      title: '3-Month Complete Athletic Transformation',
+      category: 'Strength & Conditioning',
+      price: 4999,
+      formattedPrice: '₹4,999',
+      duration: '3 Months',
+      durationMonths: 3,
       enrolledCount: 6,
       status: 'Published',
       publishedDate: 'Aug 15, 2026',
       rating: 4.9,
-      workoutFeatures: 'Barbell Strength Protocol, Plyometrics, Sprint Conditioning',
-      dietGuidance: 'Full Meal-by-Meal Blueprint + Supplementation Schedule',
-      consultationFreq: 'Weekly Live Video Consultations',
-      progressTracking: 'Daily Habit Logs & Bi-Weekly 3D Body Scans',
-      oneToOneSessions: '4 Sessions / Month',
-      description: 'Advanced strength overload, kinetic chain mechanics, sports conditioning with priority 1-on-1 coaching.'
+      workoutFeatures: '5-Day Periodized Hypertrophy & Kinetic Power Split',
+      dietGuidance: 'Full Macro Cycling & Meal Plan with Bi-weekly Adjustments',
+      personalization: 'Bi-weekly Strength & Body Composition Audits',
+      benefits: ['Priority Chat Support', 'Video Form Corrections', 'Full Nutrition Blueprint', 'Milestone Assessments'],
+      description: 'Comprehensive 12-week athletic transformation focusing on heavy compound movements, mobility, and metabolic conditioning.'
     },
     {
       id: 'tp_003',
-      title: 'Beginner Posture & Functional Mobility Reset',
-      tier: 'Starter Access',
-      price: '$39 / month',
-      duration: '6 Weeks (42 Days)',
+      title: '6-Month Elite Body Recomposition Masterclass',
+      category: 'Strength & Conditioning',
+      price: 8999,
+      formattedPrice: '₹8,999',
+      duration: '6 Months',
+      durationMonths: 6,
       enrolledCount: 4,
       status: 'Published',
       publishedDate: 'Aug 20, 2026',
       rating: 5.0,
-      workoutFeatures: 'Gentle Mobility, Spine Decompression & Core Stability',
-      dietGuidance: 'Anti-Inflammatory Hydration & Clean Eating Guide',
-      consultationFreq: '1 Onboarding Video Call + Monthly Review',
-      progressTracking: 'FMS Range-of-Motion Tracking',
-      oneToOneSessions: '1 Session / Month',
-      description: 'Gentle progressive loading focusing on hip flexor release, spinal decompression, and joint stability.'
+      workoutFeatures: '3-Phase Periodization: Base, Peak Strength, Cut & Define',
+      dietGuidance: 'Custom Competition-Grade Diet Revisions & Supplement Guide',
+      personalization: 'Monthly Biometrics Review & Continuous Progression Mapping',
+      benefits: ['Unlimited Messaging Access', 'Personalized Routine & Diet', 'Plateau-Busting Strategies', 'Progress Logs Audit'],
+      description: 'A 6-month transformational journey for serious lifters seeking significant muscle gain, fat loss, and strength PRs.'
     },
     {
       id: 'tp_004',
-      title: 'Extreme 6-Week Metabolic Kettlebell Conditioning',
-      tier: 'Pro Coaching',
-      price: '$65 / month',
-      duration: '6 Weeks (42 Days)',
+      title: '12-Month Total Fitness & Longevity Protocol',
+      category: 'General Fitness',
+      price: 14999,
+      formattedPrice: '₹14,999',
+      duration: '12 Months',
+      durationMonths: 12,
       enrolledCount: 2,
       status: 'Published',
       publishedDate: 'Sep 22, 2026',
       rating: 4.85,
-      workoutFeatures: 'High-Density Kettlebell Complexes, EMOM & Tabata',
-      dietGuidance: 'Carb-Cycling & Intermittent Recovery Meals',
-      consultationFreq: '2 Video Check-ins / Month',
-      progressTracking: 'Heart Rate Zone & VO2 Max Tracking',
-      oneToOneSessions: '2 Sessions (45 min each)',
-      description: 'High-density metabolic circuits for rapid cardiovascular conditioning and stubborn fat loss.'
-    },
-    {
-      id: 'tp_005',
-      title: 'Women Strength & Glute Hypertrophy Masterclass',
-      tier: 'Pro Coaching',
-      price: '$59 / month',
-      duration: '8 Weeks (56 Days)',
-      enrolledCount: 0,
-      status: 'Draft',
-      publishedDate: '—',
-      rating: 0,
-      workoutFeatures: 'Lower Body Specialization, Hip Thrust Overload, Core Sculpting',
-      dietGuidance: 'Hormone-Balancing Macro Planning',
-      consultationFreq: '2 Video Calls / Month',
-      progressTracking: 'Waist-to-Hip Ratio & Weekly Photo Audits',
-      oneToOneSessions: '2 Sessions',
-      description: 'Specialized hypertrophy programming designed for glute growth, waist tapering, and functional strength.'
-    },
-    {
-      id: 'tp_006',
-      title: 'Corporate Executive Desk-Worker Fitness Rehab',
-      tier: 'Starter Access',
-      price: '$45 / month',
-      duration: '4 Weeks (30 Days)',
-      enrolledCount: 3,
-      status: 'Published',
-      publishedDate: 'Sep 24, 2026',
-      rating: 5.0,
-      workoutFeatures: '20-Min Express Workouts, Desk Ergonomics, Shoulder Mobility',
-      dietGuidance: 'Healthy Eating for Busy Professionals',
-      consultationFreq: '1 Onboarding Consultation',
-      progressTracking: 'Energy Levels & Posture Score Tracking',
-      oneToOneSessions: '1 Session',
-      description: 'Quick efficient workouts and ergonomic rehabilitation routines specifically built for desk-bound professionals.'
+      workoutFeatures: 'Year-Round Progressive Periodization with Deload Cycles',
+      dietGuidance: 'Sustainable Long-Term Nutritional Lifestyle Coaching',
+      personalization: 'Quarterly Body Recomposition & Performance Goal Setting',
+      benefits: ['Full 365-Day Dedicated Coaching', 'VIP WhatsApp Access', 'Comprehensive Diet Strategy', 'Form Audits Anytime'],
+      description: 'Complete 1-year transformation and lifestyle mastery to build lasting habits, strength, and health.'
     }
   ],
 
@@ -1627,7 +1744,6 @@ const FitTrackData = {
     { id: 'profile', label: 'My Profile', icon: 'profile' },
     { id: 'goal', label: 'My Goal', icon: 'goal' },
     { id: 'trainers', label: 'Find Trainers', icon: 'trainers' },
-    { id: 'plans', label: 'Compare Plans', icon: 'plans' },
     { id: 'my_plan', label: 'My Plan', icon: 'purchase' },
     { id: 'activities', label: 'Activities', icon: 'activities' },
     { id: 'sessions', label: 'Sessions', icon: 'sessions' },
@@ -1708,6 +1824,17 @@ const FitTrackData = {
       } else {
         this.viewedSections = {};
       }
+      const storedGoal = localStorage.getItem('fittrack_active_goal');
+      if (storedGoal) {
+        try {
+          const parsedGoal = JSON.parse(storedGoal);
+          if (parsedGoal && typeof parsedGoal === 'object') {
+            this.activeGoal = { ...this.activeGoal, ...parsedGoal };
+          }
+        } catch (e) {
+          console.warn('Error parsing stored goal:', e);
+        }
+      }
     } catch (e) {
       console.warn('Storage unavailable or error loading state:', e);
     }
@@ -1723,6 +1850,7 @@ const FitTrackData = {
       localStorage.setItem('fittrack_trainer_sessions', JSON.stringify(this.trainerSessions || []));
       localStorage.setItem('fittrack_session_recordings', JSON.stringify(this.sessionRecordings || []));
       localStorage.setItem('fittrack_viewed_sections', JSON.stringify(this.viewedSections || {}));
+      localStorage.setItem('fittrack_active_goal', JSON.stringify(this.activeGoal || {}));
     } catch (e) {
       console.warn('Storage save error:', e);
     }
@@ -2073,3 +2201,34 @@ const FitTrackAPI = {
   }
 };
 
+
+/* -- Sync Mock Data with Actual Authenticated Session User -- */
+FitTrackData.syncWithSessionUser = function() {
+  try {
+    const raw = sessionStorage.getItem('fittrack_user');
+    if (!raw) return;
+    const u = JSON.parse(raw);
+    if (!u || !u.name) return;
+    const parts = u.name.trim().split(' ').filter(Boolean);
+    const first = parts[0] || u.name;
+    const initials = parts.map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'FT';
+
+    if (u.role === 'trainer') {
+      if (FitTrackData.trainerProfile) {
+        FitTrackData.trainerProfile.fullName = u.name;
+        FitTrackData.trainerProfile.name = first.replace(/^Coach\s+/i, '');
+        FitTrackData.trainerProfile.email = u.email || FitTrackData.trainerProfile.email;
+        FitTrackData.trainerProfile.avatarInitials = initials;
+      }
+    } else {
+      if (FitTrackData.currentUser) {
+        FitTrackData.currentUser.fullName = u.name;
+        FitTrackData.currentUser.name = first;
+        FitTrackData.currentUser.email = u.email || FitTrackData.currentUser.email;
+        FitTrackData.currentUser.avatarInitials = initials;
+      }
+    }
+  } catch (e) {}
+};
+
+try { FitTrackData.syncWithSessionUser(); } catch (e) {}
